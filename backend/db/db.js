@@ -11,3 +11,9 @@ db.connect((err) => {
   if (err) throw err;
   console.log("Connected to the database");
 });
+
+const queryDatabase = (query, params, callback) => {
+  db.query(query, params, callback);
+};
+
+module.exports = { queryDatabase };

@@ -1,8 +1,16 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { MdOutlineShoppingBag } from "react-icons/md";
+import SignInPopup from "./SignInPopup";
+import RegisterPopup from "./RegisterPopup";
 import "../styles/Header.scss";
+import { useAuth } from "../store";
 
 const Header = () => {
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const { isAuth, signOut } = useAuth();
+
   return (
     <header className="header">
       <div className="header__left">
@@ -21,17 +29,43 @@ const Header = () => {
           />
         </div>
         <div className="header__auth">
-          <button className="header__auth-sign-in">Увійти</button>
-
-          <button className="header__auth-register">Зареєструватись</button>
+          {isAuth ? (
+            <button onClick={signOut} className="header__auth-sign-in">
+              Вийти
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowSignIn(true)}
+                className="header__auth-sign-in"
+              >
+                Увійти
+              </button>
+              <button
+                onClick={() => setShowRegister(true)}
+                className="header__auth-register"
+              >
+                Зареєструватись
+              </button>
+            </>
+          )}
         </div>
-        <div id="icons-div">
-          <NavLink to="/bag" className="header__in-bag" id="bag">
-            <MdOutlineShoppingBag size={37} />
-            <span className="header__in-bag-number">0</span>
-          </NavLink>
-        </div>
+        {isAuth && (
+          <div id="icons-div">
+            <NavLink to="/bag" className="header__in-bag" id="bag">
+              <MdOutlineShoppingBag size={37} />
+              <span className="header__in-bag-number">0</span>
+            </NavLink>
+          </div>
+        )}
       </div>
+      {showSignIn && <SignInPopup onClose={() => setShowSignIn(false)} />}
+      {showRegister && (
+        <RegisterPopup
+          onClose={() => setShowRegister(false)}
+          setShowSignIn={setShowSignIn}
+        />
+      )}
     </header>
   );
 };

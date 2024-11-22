@@ -1,0 +1,135 @@
+@import "./variables.scss";
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+
+  & h2 {
+    margin-bottom: 15px;
+    font-size: 22px;
+    font-weight: bold;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+
+    &:hover {
+      color: #d9534f;
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  input {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      border-color: $primary-color;
+      outline: none;
+    }
+
+    &.error {
+      border-color: #d9534f;
+    }
+  }
+
+  .popup__submit {
+    background-color: $primary-color;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+
+    &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  .error-message {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: left;
+  }
+
+  .success-message {
+    color: #5cb85c;
+    font-size: 14px;
+    margin-top: 10px;
+    background-color: #dff0d8;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #5cb85c;
+  }
+}
+
+.success-message {
+  color: #5cb85c;
+  font-size: 14px;
+  margin-top: 10px;
+  background-color: #dff0d8;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #5cb85c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.popup__sign-in-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-top: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.popup__sign-in-button:hover {
+  background-color: #45a049;
+}

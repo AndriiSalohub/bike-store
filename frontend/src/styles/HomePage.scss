@@ -1,0 +1,66 @@
+@import "./variables.scss";
+
+.home-page {
+  display: flex;
+  align-items: center;
+  padding: 60px 0;
+  flex-direction: column;
+
+  &__title {
+    font-size: 40px;
+    font-weight: 800;
+    margin-bottom: 15px;
+  }
+
+  &__subtitle {
+    max-width: 800px;
+    font-size: 18px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  &__shop-button {
+    cursor: pointer;
+    font-weight: 600;
+    background-color: #fff;
+    border: $secondary-border;
+    border-radius: 8px;
+    height: 47px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    margin: 0 auto;
+
+    & a {
+      text-decoration: none;
+      color: $primary-color;
+    }
+  }
+}
+
+@media (hover: hover) {
+  .home-page__shop-button:hover {
+    background-color: #e5e5e5;
+  }
+}
+
+@media (hover: none) {
+  .home-page__shop-button:none {
+    background-color: #e5e5e5;
+  }
+}
+
+@media (max-width: 1000px) {
+  .home-page {
+    &__title {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+
+    &__subtitle {
+      font-size: 14px;
+    }
+  }
+}

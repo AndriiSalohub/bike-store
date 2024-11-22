@@ -1,5 +1,10 @@
 const bcrypt = require("bcrypt");
-const { queryDatabase } = require("../db/db");
+const {
+  getAllUsernames,
+  getAllEmails,
+  getUser,
+  addUser,
+} = require("../models/authModel");
 
 const registerUser = async (req, res) => {
   const { username, email, password, role } = req.body;
@@ -9,27 +14,23 @@ const registerUser = async (req, res) => {
   }
 
   try {
-    const getUsernames = "SELECT * FROM bike_store.user WHERE user_name = ?";
-    queryDatabase(getUsernames, [username], (err, data) => {
+    getAllUsernames(username, (err, data) => {
       if (err) return res.status(500).send("Помилка на сервері.");
 
       if (data.length > 0) {
         return res.status(400).send("Користувач з таким ім'ям вже існує.");
       }
 
-      const getEmails = "SELECT * FROM bike_store.user WHERE user_email = ?";
-      queryDatabase(getEmails, [email], async (err, data) => {
-        if (err) return res.status(500).send("Помилка на сервері.");
+      getAllEmails(email, async (err, data) => {
+        if (err) return res.status(500).send("помилка на сервері.");
 
         if (data.length > 0) {
           return res.status(400).send("Електронна пошта вже використовується.");
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const query =
-          "INSERT INTO bike_store.user (user_email, user_password, user_role, user_name) VALUES(?, ?, ?, ?)";
+        const hashedpassword = await bcrypt.hash(password, 10);
 
-        queryDatabase(query, [email, hashedPassword, role, username], (err) => {
+        addUser([email, hashedpassword, role, username], (err) => {
           if (err) return res.status(500).send("Помилка на сервері.");
           res.send("Користувач успішно зареєстрований!");
         });
@@ -49,10 +50,7 @@ const loginUser = (req, res) => {
       .send("Ім'я користувача або електронна пошта обов'язкові.");
   }
 
-  const query =
-    "SELECT * FROM bike_store.user WHERE (user_name = ? OR user_email = ?)";
-
-  queryDatabase(query, [username, email], async (err, data) => {
+  getUser(query, username, email, async (err, data) => {
     if (err) return res.status(500).send("Помилка на сервері.");
 
     if (data.length === 0) {

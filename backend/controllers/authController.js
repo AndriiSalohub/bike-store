@@ -50,7 +50,7 @@ const loginUser = (req, res) => {
       .send("Ім'я користувача або електронна пошта обов'язкові.");
   }
 
-  getUser(query, username, email, async (err, data) => {
+  getUser(username, email, async (err, data) => {
     if (err) return res.status(500).send("Помилка на сервері.");
 
     if (data.length === 0) {
@@ -58,8 +58,10 @@ const loginUser = (req, res) => {
     }
 
     const match = await bcrypt.compare(password, data[0].user_password);
+
     if (match) {
       req.session.user = data[0];
+
       return res.send({ message: "Вхід успішний!", user: data[0] });
     } else {
       return res.status(400).send("Неправильний пароль.");

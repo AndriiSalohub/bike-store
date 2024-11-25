@@ -3,21 +3,21 @@ import { NavLink } from "react-router-dom";
 import { MdOutlineShoppingBag } from "react-icons/md";
 import SignInPopup from "./SignInPopup";
 import RegisterPopup from "./RegisterPopup";
+import Navigation from "./Navigation";
 import "../styles/Header.scss";
 import { useAuth } from "../store";
 
 const Header = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const { isAuth, signOut } = useAuth();
+  const { isAuth, signOut, user } = useAuth();
 
   return (
     <header className="header">
       <div className="header__left">
         <h1 className="header__title">bikes.</h1>
         <nav className="header__navigation">
-          <NavLink to="/">Домашня сторінка</NavLink>
-          <NavLink to="/bikes">Товари</NavLink>
+          <Navigation role={user?.user_role} />
         </nav>
       </div>
       <div className="header__right">
@@ -50,7 +50,7 @@ const Header = () => {
             </>
           )}
         </div>
-        {isAuth && (
+        {isAuth && user?.user_role === "Користувач" && (
           <div id="icons-div">
             <NavLink to="/bag" className="header__in-bag" id="bag">
               <MdOutlineShoppingBag size={37} />

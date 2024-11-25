@@ -10,6 +10,7 @@ export const useAuth = create((set) => ({
       const response = await axios.get("http://localhost:3000/session", {
         withCredentials: true,
       });
+
       if (response.data.loggedIn) {
         set(() => ({
           isAuth: true,
@@ -43,6 +44,7 @@ export const useAuth = create((set) => ({
         isAuth: false,
         user: null,
       }));
+
       localStorage.removeItem("user");
     } catch (error) {
       console.error("Помилка під час виходу:", error);
@@ -57,7 +59,7 @@ export const useBikes = create((set) => ({
       const response = await axios.get("http://localhost:3000/bikes");
       set(() => ({ bikes: response.data }));
     } catch (error) {
-      console.error("Error fetching bikes:", error);
+      console.error("Помилка отримання велосипедів:", error);
     }
   },
 }));

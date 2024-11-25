@@ -17,6 +17,7 @@ const BikesSlider = () => {
     const fetchData = async () => {
       await fetchBikes();
     };
+
     fetchData();
   }, [fetchBikes]);
 

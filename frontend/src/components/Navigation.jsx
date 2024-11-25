@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { NavLink, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -10,17 +11,14 @@ import "../styles/Navigation.scss";
 const Navigation = ({ role }) => {
   const location = useLocation();
 
-  // Determine the menu title based on the current route
   const getTitle = () => {
     switch (location.pathname) {
       case "/":
-        return "Домашня сторінка";
+        return "Статистика";
       case "/bikes_edit":
         return "Управління даними";
       case "/reports":
         return "Звіти";
-      case "/statistics":
-        return "Статистика";
       default:
         return "Адмін Меню";
     }
@@ -34,16 +32,13 @@ const Navigation = ({ role }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem asChild>
-            <NavLink to="/">Домашня сторінка</NavLink>
+            <NavLink to="/">Статистика</NavLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink to="/bikes_edit">Управління даними</NavLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink to="/reports">Звіти</NavLink>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <NavLink to="/statistics">Статистика</NavLink>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -1,0 +1,55 @@
+@import "./variables.scss";
+
+.statistics {
+  background-color: $primary-background;
+  padding: 20px;
+  border: $primary-border;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 20px auto;
+
+  &__title {
+    color: $primary-color;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: $secondary-color;
+    padding: 15px;
+    border: $secondary-border;
+    border-radius: 8px;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.05);
+      border: $line-border;
+    }
+  }
+
+  &__type-name,
+  &__brand-name {
+    color: $primary-color;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  &__count,
+  &__sold,
+  &__rating {
+    color: $primary-color;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+}

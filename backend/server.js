@@ -8,6 +8,7 @@ const session = require("express-session");
 
 const authRoutes = require("./routes/authRoutes");
 const bikeRoutes = require("./routes/bikeRoutes");
+const statsRoutes = require("./routes/statsRouter");
 
 const app = express();
 app.use(express.json());
@@ -36,6 +37,7 @@ app.use(
 
 app.use("", authRoutes);
 app.use("", bikeRoutes);
+app.use("", statsRoutes);
 
 app.get("/session", (req, res) => {
   if (req.session.user) {

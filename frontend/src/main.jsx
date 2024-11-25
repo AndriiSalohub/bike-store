@@ -7,7 +7,6 @@ import BikesEditPage from "./pages/BikesEditPage.jsx";
 import "./styles/reset.css";
 import "./styles/index.css";
 import ReportsPage from "./pages/ReportsPage.jsx";
-import StatisticsPage from "./pages/StatisticsPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -29,10 +28,6 @@ const router = createBrowserRouter([
       {
         path: "reports",
         element: <ReportsPage />,
-      },
-      {
-        path: "/statistics",
-        element: <StatisticsPage />,
       },
     ],
   },

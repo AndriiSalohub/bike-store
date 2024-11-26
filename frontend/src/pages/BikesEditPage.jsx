@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
+import BikesEdit from "../components/BikesEdit";
 
 const BikesEditPage = () => {
-  return <div></div>;
+  return <BikesEdit />;
 };
 
 export default BikesEditPage;

@@ -1,4 +1,4 @@
-const { getAllBikes } = require("../models/bikeModel");
+const { getAllBikes, getBikeById, updateBike } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
   getAllBikes((err, data) => {
@@ -9,6 +9,27 @@ const getBikes = (req, res) => {
   });
 };
 
+const getBike = (req, res) => {
+  const bikeId = req.params.bike_id;
+
+  getBikeById(bikeId, (err, data) => {
+    if (err) return res.status(500).send(err);
+    return res.send(data);
+  });
+};
+
+const putBike = (req, res) => {
+  const bikeId = req.params.bike_id;
+  const newBike = req.body;
+
+  updateBike(bikeId, newBike, (err, data) => {
+    if (err) return res.status(500).send(err);
+    return res.status(200).send(data);
+  });
+};
+
 module.exports = {
   getBikes,
+  getBike,
+  putBike,
 };

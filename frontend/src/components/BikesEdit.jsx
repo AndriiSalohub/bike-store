@@ -7,26 +7,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-const BikeInputField = ({ id, label, value }) => (
-  <div className="grid grid-cols-4 items-center gap-4">
-    <Label htmlFor={id} className="text-left">
-      {label}
-    </Label>
-    <Input id={id} value={value} className="col-span-3" />
-  </div>
-);
+import { NavLink } from "react-router-dom";
 
 const BikesEdit = () => {
   const { fetchBikes, bikes } = useBikes();
@@ -82,111 +64,21 @@ const BikesEdit = () => {
                   rel="noopener noreferrer"
                   className="w-full inline-block"
                 >
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full transition-all ease-in-out hover:scale-105"
+                  >
                     Переглянути зображення
                   </Button>
                 </a>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">Редагувати</Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-h-[80vh] overflow-y-auto p-4 sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Редагувати велосипед</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      {/* Reusable Input Fields */}
-                      <BikeInputField
-                        id="bike_model"
-                        label="Модель"
-                        value={bike.bike_model}
-                      />
-                      <BikeInputField
-                        id="bike_image_url"
-                        label="Посилання на зображення"
-                        value={bike.bike_image_url}
-                      />
-                      <BikeInputField
-                        id="bike_price"
-                        label="Ціна"
-                        value={bike.bike_price}
-                      />
-                      <BikeInputField
-                        id="bike_color"
-                        label="Колір"
-                        value={bike.bike_color}
-                      />
-                      <BikeInputField
-                        id="bike_quantity"
-                        label="Кількість"
-                        value={bike.bike_quantity}
-                      />
-                      <BikeInputField
-                        id="bike_rating"
-                        label="Рейтинг"
-                        value={bike.bike_rating}
-                      />
-                      <BikeInputField
-                        id="type_id"
-                        label="Ідентифікатор типу"
-                        value={bike.type_id}
-                      />
-                      <BikeInputField
-                        id="brand_id"
-                        label="Ідентифікатор бренду"
-                        value={bike.brand_id}
-                      />
-                      <BikeInputField
-                        id="wheel_size"
-                        label="Розмір колеса"
-                        value={bike.wheel_size}
-                      />
-                      <BikeInputField
-                        id="frame_material"
-                        label="Матеріал рами"
-                        value={bike.frame_material}
-                      />
-                      <BikeInputField
-                        id="gear_count"
-                        label="Кількість передач"
-                        value={bike.gear_count}
-                      />
-                      <BikeInputField
-                        id="bike_weight"
-                        label="Вага"
-                        value={bike.bike_weight}
-                      />
-                      <BikeInputField
-                        id="max_weight_capacity"
-                        label="Максимальна допустима вага"
-                        value={bike.max_weight_capacity}
-                      />
-                      <BikeInputField
-                        id="gender"
-                        label="Стать"
-                        value={bike.gender}
-                      />
-                      <BikeInputField
-                        id="bike_warranty_period"
-                        label="Гарантія"
-                        value={bike.bike_warranty_period}
-                      />
-                      <BikeInputField
-                        id="bike_release_date"
-                        label="Дата випуску"
-                        value={bike.bike_release_date}
-                      />
-                      <BikeInputField
-                        id="bike_description"
-                        label="Опис"
-                        value={bike.bike_description}
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit">Зберегти зміни</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <NavLink to={`/edit/bikes/${bike.bike_id}`}>
+                  <Button
+                    variant="outline"
+                    className="w-full text-white bg-black transition-all ease-in-out duration-300 hover:bg-gray-800 hover:scale-105 hover:text-white"
+                  >
+                    Редагувати
+                  </Button>
+                </NavLink>
                 <Button
                   variant="outline"
                   className="w-full bg-red-400 text-sky-50 transition-all ease-in-out duration-300 hover:bg-red-500 hover:scale-105 hover:text-sky-50"

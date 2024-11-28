@@ -9,6 +9,8 @@ const session = require("express-session");
 const authRoutes = require("./routes/authRoutes");
 const bikeRoutes = require("./routes/bikeRoutes");
 const statsRoutes = require("./routes/statsRouter");
+const typeRoutes = require("./routes/typeRoutes");
+const brandRoutes = require("./routes/brandRoutes");
 
 const app = express();
 app.use(express.json());
@@ -38,6 +40,8 @@ app.use(
 app.use("", authRoutes);
 app.use("", bikeRoutes);
 app.use("", statsRoutes);
+app.use("", typeRoutes);
+app.use("", brandRoutes);
 
 app.get("/session", (req, res) => {
   if (req.session.user) {

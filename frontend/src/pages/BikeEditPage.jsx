@@ -23,8 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 const fieldLabels = {
   bike_id: "ID велосипеда",
   bike_model: "Модель велосипеда",
-  brand_id: "ID бренду",
-  type_id: "ID типу",
+  brand_id: "Назва бренду",
+  type_id: "Назва типу",
   bike_price: "Ціна велосипеда",
   wheel_size: "Розмір колеса",
   frame_material: "Матеріал рами",
@@ -40,6 +40,7 @@ const fieldLabels = {
   max_weight_capacity: "Максимальна вантажопідйомність",
   bike_warranty_period: "Гарантійний період",
   bike_release_date: "Дата випуску велосипеда",
+  promotion_id: "ID знижки",
 };
 
 const BikeEditPage = () => {
@@ -66,7 +67,13 @@ const BikeEditPage = () => {
     max_weight_capacity: "",
     bike_warranty_period: "",
     bike_release_date: "",
+    promotion_id: "",
   });
+
+  const [types, setTypes] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchBikeData = async () => {
@@ -95,13 +102,140 @@ const BikeEditPage = () => {
     fetchBikeData();
   }, [bikeId]);
 
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/types");
+
+        setTypes(response.data);
+      } catch (error) {
+        console.error("Помилка отримання даних про типи:", error);
+      }
+    };
+
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/brands");
+
+        setBrands(response.data);
+      } catch (error) {
+        console.error("Помилка отримання даних про бренди:", error);
+      }
+    };
+
+    fetchTypes();
+    fetchBrands();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setBike((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!bike.bike_model)
+      newErrors.bike_model = "Модель велосипеда є обов'язковою!";
+
+    if (
+      !bike.bike_price ||
+      isNaN(bike.bike_price) ||
+      bike.bike_price <= 1000 ||
+      bike.bike_price > 1000000
+    ) {
+      newErrors.bike_price =
+        "Ціна повинна бути числом, більше тисячі і менше мільйона!";
+    }
+
+    if (
+      !bike.bike_quantity ||
+      isNaN(bike.bike_quantity) ||
+      bike.bike_quantity <= 0 ||
+      bike.bike_quantity > 3000
+    ) {
+      newErrors.bike_quantity =
+        "Кількість повинна бути числом, більше нуля і менше трьох тисяч!";
+    }
+
+    if (
+      !bike.bike_weight ||
+      isNaN(bike.bike_weight) ||
+      bike.bike_weight <= 5 ||
+      bike.bike_weight > 40
+    ) {
+      newErrors.bike_weight =
+        "Вага повинна бути числом і більше п'яти кг, але не більше 40 кг!";
+    }
+
+    if (
+      !bike.bike_rating ||
+      isNaN(bike.bike_rating) ||
+      bike.bike_rating < 0 ||
+      bike.bike_rating > 5
+    ) {
+      newErrors.bike_rating = "Рейтинг повинен бути числом від 0 до 5!";
+    }
+
+    if (
+      !bike.max_weight_capacity ||
+      isNaN(bike.max_weight_capacity) ||
+      bike.max_weight_capacity <= 25 ||
+      bike.max_weight_capacity > 1500
+    ) {
+      newErrors.max_weight_capacity =
+        "Максимальна вантажопідйомність повинна бути числом і більше 25 кг, але не більше 150 кг!";
+    }
+
+    if (
+      !bike.bike_warranty_period ||
+      isNaN(bike.bike_warranty_period) ||
+      bike.bike_warranty_period <= 0 ||
+      bike.bike_warranty_period > 60
+    ) {
+      newErrors.bike_warranty_period =
+        "Гарантійний період повинен бути числом і більше нуля, але не більше 60 місяців!";
+    }
+
+    if (!bike.bike_release_date) {
+      newErrors.bike_release_date = "Дата випуску є обов'язковою!";
+    } else {
+      const releaseDate = new Date(bike.bike_release_date);
+      const minDate = new Date("2020-01-01");
+      const currentDate = new Date();
+      if (releaseDate < minDate || releaseDate > currentDate) {
+        newErrors.bike_release_date =
+          "Дата випуску повинна бути не раніше 2020 року та не пізніше поточної дати!";
+      }
+    }
+
+    if (
+      !bike.bike_image_url ||
+      !/^(ftp|http|https):\/\/[^ "]+$/.test(bike.bike_image_url)
+    ) {
+      newErrors.bike_image_url = "Вкажіть правильне посилання на зображення!";
+    }
+
+    if (!bike.bike_availability)
+      newErrors.bike_availability = "Оберіть наявність велосипеда!";
+
+    if (!bike.gender)
+      newErrors.gender = "Оберіть статеву приналежність велосипеда!";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSaveChanges = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    if (!validate()) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       await axios.put(`http://localhost:3000/bikes/${bikeId}`, {
@@ -119,6 +253,8 @@ const BikeEditPage = () => {
         title: "Результат:",
         description: `Помилка при зміненні даних про велосипед ${bike.bike_model}`,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -137,12 +273,34 @@ const BikeEditPage = () => {
                 </Label>
                 {key === "bike_availability" || key === "gender" ? (
                   <Select
-                    value={value || ""}
+                    value={
+                      key === "bike_availability"
+                        ? value === 1
+                          ? "Доступний"
+                          : value === 0
+                            ? "Недоступний"
+                            : ""
+                        : value
+                    }
                     onValueChange={(val) =>
-                      setBike((prev) => ({ ...prev, [key]: val }))
+                      setBike((prev) => ({
+                        ...prev,
+                        [key]:
+                          key === "bike_availability"
+                            ? val === "Доступний"
+                              ? 1
+                              : 0
+                            : val,
+                      }))
                     }
                   >
-                    <SelectTrigger>{value || "Виберіть опцію"}</SelectTrigger>
+                    <SelectTrigger>
+                      {value === 1
+                        ? "Доступний"
+                        : value === 0
+                          ? "Недоступний"
+                          : value || "Виберіть опцію"}
+                    </SelectTrigger>
                     <SelectContent>
                       {key === "bike_availability" ? (
                         <>
@@ -193,6 +351,67 @@ const BikeEditPage = () => {
                       />
                     </div>
                   </div>
+                ) : key === "type_id" ? (
+                  <Select
+                    value={
+                      types.find((type) => type.type_id === bike.type_id)
+                        ?.type_name || ""
+                    }
+                    onValueChange={(val) => {
+                      const selectedType = types.find(
+                        (type) => type.type_name === val,
+                      );
+
+                      setBike((prev) => ({
+                        ...prev,
+                        type_id: selectedType?.type_id || "",
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      {types.find((type) => type.type_id === bike.type_id)
+                        ?.type_name || "Оберіть тип"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {types.map((type) => (
+                        <SelectItem key={type.type_id} value={type.type_name}>
+                          {type.type_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : key === "brand_id" ? (
+                  <Select
+                    value={
+                      brands.find((brand) => brand.brand_id === bike.brand_id)
+                        ?.brand_name || ""
+                    }
+                    onValueChange={(val) => {
+                      const selectedBrand = brands.find(
+                        (brand) => brand.brand_name === val,
+                      );
+
+                      setBike((prev) => ({
+                        ...prev,
+                        brand_id: selectedBrand?.brand_id || "",
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      {brands.find((brand) => brand.brand_id === bike.brand_id)
+                        ?.brand_name || "Оберіть бренд"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map((brand) => (
+                        <SelectItem
+                          key={brand.brand_id}
+                          value={brand.brand_name}
+                        >
+                          {brand.brand_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <Input
                     id={key}
@@ -210,12 +429,17 @@ const BikeEditPage = () => {
                     onChange={handleInputChange}
                   />
                 )}
+                {errors[key] && (
+                  <div className="text-red-600 text-sm">{errors[key]}</div>
+                )}
               </div>
             ))}
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={(e) => handleSaveChanges(e)}>Зберегти зміни</Button>
+          <Button onClick={(e) => handleSaveChanges(e)} disabled={isSubmitting}>
+            {isSubmitting ? "Зберігається..." : "Зберегти зміни"}
+          </Button>
         </CardFooter>
       </Card>
     </div>

@@ -62,6 +62,11 @@ export const useBikes = create((set) => ({
       console.error("Помилка отримання велосипедів:", error);
     }
   },
+
+  deleteBike: (bikeId) =>
+    set((state) => ({
+      bikes: state.bikes.filter((bike) => bike.bike_id !== bikeId),
+    })),
 }));
 
 export const useTypes = create((set) => ({

@@ -6,11 +6,23 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 const BikesEdit = () => {
-  const { fetchBikes, bikes } = useBikes();
+  const { toast } = useToast();
+
+  const { fetchBikes, bikes, deleteBike } = useBikes();
   const { types, fetchTypes } = useTypes();
   const { brands, fetchBrands } = useBrands();
 
@@ -26,6 +38,24 @@ const BikesEdit = () => {
     fetchTypes();
     fetchBrands();
   }, []);
+
+  const handleDelete = async (model, bikeId) => {
+    try {
+      await axios.delete(`http://localhost:3000/bikes/${bikeId}`);
+      deleteBike(bikeId);
+
+      toast({
+        title: "Видалення",
+        description: `Було успішно видалено велосипед ${model}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Помилка видалення",
+        description: `Невдалось видалити велосипед ${model}`,
+      });
+      console.error("Не вдалося видалити велосипед:", error);
+    }
+  };
 
   return (
     <div className="overflow-x-auto p-4">
@@ -98,12 +128,32 @@ const BikesEdit = () => {
                     Редагувати
                   </Button>
                 </NavLink>
-                <Button
-                  variant="outline"
-                  className="w-full bg-red-400 text-sky-50 transition-all ease-in-out duration-300 hover:bg-red-500 hover:scale-105 hover:text-sky-50"
-                >
-                  Видалити
-                </Button>
+                <Dialog>
+                  <DialogTrigger className="w-full p-1 rounded-sm bg-red-400 text-sky-50 transition-all ease-in-out duration-300 hover:bg-red-500 hover:scale-105 hover:text-sky-50">
+                    Видалити
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="mb-4">
+                        Ви впевнені, що хочете видалити велосипед{" "}
+                        {bike.bike_model}?
+                      </DialogTitle>
+                      <div className="flex gap-4">
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            handleDelete(bike.bike_model, bike.bike_id)
+                          }
+                        >
+                          Так
+                        </Button>
+                        <DialogClose>
+                          <Button type="button">Ні</Button>
+                        </DialogClose>
+                      </div>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardFooter>
           </Card>

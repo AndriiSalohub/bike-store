@@ -1,4 +1,9 @@
-const { getAllBikes, getBikeById, updateBike } = require("../models/bikeModel");
+const {
+  getAllBikes,
+  getBikeById,
+  updateBike,
+  deleteBike,
+} = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
   getAllBikes((err, data) => {
@@ -28,8 +33,18 @@ const putBike = (req, res) => {
   });
 };
 
+const deleteBikeRecord = (req, res) => {
+  const bikeId = req.params.bike_id;
+
+  deleteBike(bikeId, (err, data) => {
+    if (err) return res.status(500).send(err);
+    return res.send(data);
+  });
+};
+
 module.exports = {
   getBikes,
   getBike,
   putBike,
+  deleteBikeRecord,
 };

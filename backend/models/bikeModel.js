@@ -18,4 +18,10 @@ const updateBike = (bikeId, newBike, callback) => {
   queryDatabase(query, [newBike, bikeId], callback);
 };
 
-module.exports = { getAllBikes, getBikeById, updateBike };
+const deleteBike = (bikeId, callback) => {
+  const query = "DELETE FROM bike_store.bike WHERE bike_id = ?";
+
+  queryDatabase(query, [bikeId], callback);
+};
+
+module.exports = { getAllBikes, getBikeById, updateBike, deleteBike };

@@ -15,7 +15,9 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header__left">
-        <h1 className="header__title">bikes.</h1>
+        <h1 className="header__title">
+          <NavLink to="/">bikes.</NavLink>
+        </h1>
         <nav className="header__navigation">
           <Navigation role={user?.user_role} />
         </nav>

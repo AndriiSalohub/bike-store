@@ -63,3 +63,33 @@ export const useBikes = create((set) => ({
     }
   },
 }));
+
+export const useTypes = create((set) => ({
+  types: [],
+  fetchTypes: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/types");
+
+      set(() => ({
+        types: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про типи:", error);
+    }
+  },
+}));
+
+export const useBrands = create((set) => ({
+  brands: [],
+  fetchBrands: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/brands");
+
+      set(() => ({
+        brands: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про бренди:", error);
+    }
+  },
+}));

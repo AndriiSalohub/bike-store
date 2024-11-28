@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
 import { useEffect } from "react";
-import { useBikes } from "../store";
+import { useBikes, useTypes, useBrands } from "../store";
 import {
   Card,
   CardHeader,
@@ -12,6 +11,8 @@ import { NavLink } from "react-router-dom";
 
 const BikesEdit = () => {
   const { fetchBikes, bikes } = useBikes();
+  const { types, fetchTypes } = useTypes();
+  const { brands, fetchBrands } = useBrands();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,6 +21,11 @@ const BikesEdit = () => {
 
     fetchData();
   }, [fetchBikes]);
+
+  useEffect(() => {
+    fetchTypes();
+    fetchBrands();
+  }, []);
 
   return (
     <div className="overflow-x-auto p-4">
@@ -40,8 +46,20 @@ const BikesEdit = () => {
                 <p>Колір: {bike.bike_color}</p>
                 <p>Кількість: {bike.bike_quantity}</p>
                 <p>Рейтинг: {bike.bike_rating}</p>
-                <p>Тип: {bike.type_id}</p>
-                <p>Ідентифікатор бренду: {bike.brand_id}</p>
+                <p>
+                  Тип:{" "}
+                  {
+                    types?.find((type) => type.type_id === bike.type_id)
+                      ?.type_name
+                  }
+                </p>
+                <p>
+                  Бренд:{" "}
+                  {
+                    brands?.find((brand) => brand.brand_id === bike.brand_id)
+                      ?.brand_name
+                  }
+                </p>
                 <p>Розмір колеса: {bike.wheel_size} дюймів</p>
                 <p>Матеріал рами: {bike.frame_material}</p>
                 <p>Кількість передач: {bike.gear_count}</p>
@@ -53,6 +71,7 @@ const BikesEdit = () => {
                   Дата випуску:{" "}
                   {new Date(bike.bike_release_date).toLocaleDateString()}
                 </p>
+                <p>Знижка: {bike.promotion_id || "відсутня"}</p>
                 <p className="mt-2">{bike.bike_description}</p>
               </div>
             </CardContent>

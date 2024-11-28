@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useBrands, useTypes } from "../store";
 
 const fieldLabels = {
   bike_id: "ID велосипеда",
@@ -45,6 +46,8 @@ const fieldLabels = {
 
 const BikeEditPage = () => {
   const { toast } = useToast();
+  const { types, fetchTypes } = useTypes();
+  const { brands, fetchBrands } = useBrands();
 
   const { bike_id: bikeId } = useParams();
   const [bike, setBike] = useState({
@@ -70,8 +73,6 @@ const BikeEditPage = () => {
     promotion_id: "",
   });
 
-  const [types, setTypes] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,29 +104,11 @@ const BikeEditPage = () => {
   }, [bikeId]);
 
   useEffect(() => {
-    const fetchTypes = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/types");
-
-        setTypes(response.data);
-      } catch (error) {
-        console.error("Помилка отримання даних про типи:", error);
-      }
-    };
-
-    const fetchBrands = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/brands");
-
-        setBrands(response.data);
-      } catch (error) {
-        console.error("Помилка отримання даних про бренди:", error);
-      }
-    };
-
     fetchTypes();
     fetchBrands();
   }, []);
+
+  console.log(brands);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

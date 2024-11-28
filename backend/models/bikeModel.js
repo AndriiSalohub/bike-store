@@ -24,4 +24,17 @@ const deleteBike = (bikeId, callback) => {
   queryDatabase(query, [bikeId], callback);
 };
 
-module.exports = { getAllBikes, getBikeById, updateBike, deleteBike };
+const getTopBikes = (callback) => {
+  const query =
+    "SELECT * FROM bike_store.bike ORDER BY bike.bike_rating DESC LIMIT 7;";
+
+  queryDatabase(query, [], callback);
+};
+
+module.exports = {
+  getAllBikes,
+  getBikeById,
+  updateBike,
+  deleteBike,
+  getTopBikes,
+};

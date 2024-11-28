@@ -3,6 +3,7 @@ const {
   getBikeById,
   updateBike,
   deleteBike,
+  getTopBikes,
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
@@ -42,9 +43,22 @@ const deleteBikeRecord = (req, res) => {
   });
 };
 
+const getBikesWithHighestRating = (req, res) => {
+  getTopBikes((err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .send("Помилка при отриманні списку велосипедів з найвищім рейтингом.");
+    }
+
+    return res.send(data);
+  });
+};
+
 module.exports = {
   getBikes,
   getBike,
   putBike,
   deleteBikeRecord,
+  getBikesWithHighestRating,
 };

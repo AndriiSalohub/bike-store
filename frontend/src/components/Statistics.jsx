@@ -10,27 +10,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ChartPieIcon, PackageIcon, StarIcon } from "lucide-react";
+import {
+  ChartPieIcon,
+  PackageIcon,
+  StarIcon,
+  ShoppingBagIcon,
+  BikeIcon,
+} from "lucide-react";
 
 const Statistics = () => {
   const [typesStats, setTypesStats] = useState([]);
   const [brandsStats, setBrandsStats] = useState([]);
+  const [ordersStats, setOrdersStats] = useState([]);
+  const [bikesStats, setBikesStats] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [typesResponse, brandsResponse] = await Promise.all([
-          axios.get("http://localhost:3000/statistics/types"),
-          axios.get("http://localhost:3000/statistics/brands"),
-        ]);
+        const [typesResponse, brandsResponse, ordersResponse, bikesResponse] =
+          await Promise.all([
+            axios.get("http://localhost:3000/statistics/types"),
+            axios.get("http://localhost:3000/statistics/brands"),
+            axios.get("http://localhost:3000/statistics/orders"),
+            axios.get("http://localhost:3000/statistics/bikes"),
+          ]);
+
         setTypesStats(typesResponse.data);
         setBrandsStats(brandsResponse.data);
+        setOrdersStats(ordersResponse.data);
+        setBikesStats(bikesResponse.data);
       } catch (err) {
         console.error("Error fetching statistics:", err);
       }
     };
     fetchStats();
   }, []);
+
+  console.log(brandsStats);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -45,12 +61,20 @@ const Statistics = () => {
             {typesStats.map((stat, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">{stat.type_name}</h3>
-                    <Badge variant="secondary">
-                      Кількість проданих велосипедів: {stat.total_bike_count}
-                    </Badge>
-                  </div>
+                  <h3 className="text-lg font-semibold text-center">
+                    {stat.type_name}
+                  </h3>
+                  <Badge variant="secondary">
+                    Кількість проданих велосипедів: {stat.sold_count}
+                  </Badge>
+                  <Badge variant="secondary">
+                    Загальна сума продаж:{" "}
+                    {Number(stat.total_revenue).toFixed(2)}
+                  </Badge>
+                  <Badge variant="secondary">
+                    Середня ціна проданих велосипедів:{" "}
+                    {Number(stat.avg_price).toFixed(2)}
+                  </Badge>
                 </CardContent>
               </Card>
             ))}
@@ -81,21 +105,105 @@ const Statistics = () => {
                     {stat.brand_name}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline">{stat.total_bike_count}</Badge>
+                    <Badge variant="outline">{stat.total_bikes}</Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline">{stat.sold_bike_count}</Badge>
+                    <Badge variant="outline">{stat.sold_count}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">
                       <StarIcon className="w-4 h-4 mr-1 text-yellow-500" />
-                      {parseFloat(stat.average_rating).toFixed(2)}
+                      {stat.avg_rating
+                        ? parseFloat(stat.avg_rating).toFixed(2)
+                        : "---"}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <ShoppingBagIcon className="mr-2" /> Статистика замовлень
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Спосіб оплати</TableHead>
+                <TableHead className="text-center">
+                  Середня кількість товарів
+                </TableHead>
+                <TableHead className="text-right">
+                  Середня сума замовлення
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ordersStats.map((stat, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">
+                    {stat.payment_method}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">
+                      {Number(stat.avg_items_per_order).toFixed(2)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="outline">
+                      {Number(stat.avg_price_per_order).toFixed(2)}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <BikeIcon className="mr-2" /> Популярні велосипеди
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {bikesStats.map((bike, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <img
+                    src={bike.bike_image_url}
+                    alt={bike.bike_model}
+                    className="w-full object-cover rounded-md"
+                  />
+                  <h3 className="text-lg font-semibold text-center mt-4">
+                    {bike.bike_model}
+                  </h3>
+                  <div className="text-center mt-2 flex gap-2">
+                    <Badge variant="secondary">
+                      Продано: {bike.total_sold}
+                    </Badge>
+                    <Badge variant="secondary">
+                      Ціна: {Number(bike.price).toFixed(2)}
+                    </Badge>
+                    <Badge variant="secondary">
+                      Рейтинг:{" "}
+                      {bike.bike_rating
+                        ? Number(bike.bike_rating).toFixed(2)
+                        : "---"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

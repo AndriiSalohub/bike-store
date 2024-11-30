@@ -82,6 +82,11 @@ export const useTypes = create((set) => ({
       console.error("Помилка отримання даних про типи:", error);
     }
   },
+  deleteType: (typeId) => {
+    set((state) => ({
+      types: state.types.filter((type) => type.type_id !== typeId),
+    }));
+  },
 }));
 
 export const useBrands = create((set) => ({
@@ -96,5 +101,10 @@ export const useBrands = create((set) => ({
     } catch (error) {
       console.error("Помилка отримання даних про бренди:", error);
     }
+  },
+  deleteBrand: (brandId) => {
+    set((state) => ({
+      brands: state.brands.filter((brand) => brand.brand_id !== brandId),
+    }));
   },
 }));

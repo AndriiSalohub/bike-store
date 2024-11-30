@@ -3,11 +3,13 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import BikesPage from "./pages/BikesPage.jsx";
-import BikesEditPage from "./pages/BikesEditPage.jsx";
+import EditPage from "./pages/EditPage.jsx";
 import "./styles/reset.css";
 import "./styles/index.css";
 import ReportsPage from "./pages/ReportsPage.jsx";
 import BikeEditPage from "./pages/BikeEditPage.jsx";
+import TypesEditPage from "./pages/TypeEditPage.jsx";
+import BrandsEditPage from "./pages/BrandEditPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -23,8 +25,8 @@ const router = createBrowserRouter([
         element: <BikesPage />,
       },
       {
-        path: "bikes_edit",
-        element: <BikesEditPage />,
+        path: "edit",
+        element: <EditPage />,
       },
       {
         path: "reports",
@@ -33,6 +35,14 @@ const router = createBrowserRouter([
       {
         path: "edit/bikes/:bike_id",
         element: <BikeEditPage />,
+      },
+      {
+        path: "edit/types/:type_id",
+        element: <TypesEditPage />,
+      },
+      {
+        path: "edit/brands/:brand_id",
+        element: <BrandsEditPage />,
       },
     ],
   },

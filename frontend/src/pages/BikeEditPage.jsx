@@ -108,8 +108,6 @@ const BikeEditPage = () => {
     fetchBrands();
   }, []);
 
-  console.log(brands);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -301,6 +299,8 @@ const BikeEditPage = () => {
                       )}
                     </SelectContent>
                   </Select>
+                ) : key === "bike_id" ? (
+                  <Input id={key} name={key} value={value} disabled />
                 ) : key === "bike_description" ? (
                   <Textarea
                     id={key}

@@ -35,7 +35,7 @@ const Navigation = ({ role }) => {
             <NavLink to="/">Статистика</NavLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <NavLink to="/bikes_edit">Управління даними</NavLink>
+            <NavLink to="/edit">Управління даними</NavLink>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink to="/reports">Звіти</NavLink>

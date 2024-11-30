@@ -67,6 +67,7 @@ export const useBikes = create((set) => ({
     set((state) => ({
       bikes: state.bikes.filter((bike) => bike.bike_id !== bikeId),
     })),
+  setBikes: (bikes) => set(() => ({ bikes })),
 }));
 
 export const useTypes = create((set) => ({

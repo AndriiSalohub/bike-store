@@ -1,10 +1,10 @@
 const { queryDatabase } = require("../db/db");
 
-const getAllTypesStatistic = (callback) => {
+const getAllTypesStatistic = (startDate, endDate, callback) => {
   const query = `
   SELECT 
     t.type_name, 
-    COUNT(bco.bike_cart_id) AS sold_count, 
+    SUM(bc.quantity) AS sold_count, 
     SUM(b.bike_price * bc.quantity) AS total_revenue, 
     AVG(b.bike_price) AS avg_price 
   FROM 
@@ -21,14 +21,15 @@ const getAllTypesStatistic = (callback) => {
     bike_store.order o ON bco.order_id = o.order_id
   WHERE 
     o.order_status != 'Відмінено' 
+    AND (o.order_date BETWEEN ? AND ? OR ? IS NULL)
   GROUP BY 
     t.type_name;
   `;
 
-  queryDatabase(query, [], callback);
+  queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
-const getAllBrandsStatistic = (callback) => {
+const getAllBrandsStatistic = (startDate, endDate, callback) => {
   const query = `
   SELECT 
     br.brand_name, 
@@ -47,43 +48,48 @@ const getAllBrandsStatistic = (callback) => {
     bike_store.cart c ON bc.cart_id = c.cart_id 
   LEFT JOIN 
     bike_store.order o ON bco.order_id = o.order_id AND o.order_status != 'Відмінено' 
+  WHERE 
+    (o.order_date BETWEEN ? AND ? OR ? IS NULL)
   GROUP BY 
     br.brand_name;
   `;
 
-  queryDatabase(query, [], callback);
+  queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
-const getOrdersStatistic = (callback) => {
+const getOrdersStatistic = (startDate, endDate, callback) => {
   const query = `
-  SELECT
-    o.payment_method,
-    AVG(order_items.total_items) AS avg_items_per_order,
-    AVG(order_items.total_price) AS avg_price_per_order
-  FROM
-    bike_store.order o
-  JOIN
-    (
-        SELECT
-            o.order_id,
-            SUM(bc.quantity) AS total_items,
-            SUM(bc.quantity * b.bike_price) AS total_price
-        FROM
-            bike_store.order o
-        INNER  JOIN
-            bike_store.bike_cart_order bco ON o.order_id = bco.order_id
-        INNER JOIN
-            bike_store.bike_cart bc ON bco.bike_cart_id = bc.bike_cart_id
-        INNER JOIN
-            bike_store.bike b ON bc.bike_id = b.bike_id
-        GROUP BY
-            o.order_id
-    ) AS order_items ON o.order_id = order_items.order_id
-  GROUP BY
-    o.payment_method;
+    SELECT
+        o.payment_method,
+        ROUND(AVG(order_items.total_items), 2) AS avg_items_per_order,
+        ROUND(AVG(order_items.total_price), 2) AS avg_price_per_order
+    FROM
+        bike_store.order o
+    JOIN
+        (
+            SELECT
+                o.order_id,
+                SUM(bc.quantity) AS total_items,
+                SUM(bc.quantity * b.bike_price) AS total_price
+            FROM
+                bike_store.order o
+            INNER JOIN
+                bike_store.bike_cart_order bco ON o.order_id = bco.order_id
+            INNER JOIN
+                bike_store.bike_cart bc ON bco.bike_cart_id = bc.bike_cart_id
+            INNER JOIN
+                bike_store.bike b ON bc.bike_id = b.bike_id
+            WHERE
+                o.order_status != 'Відмінено'
+                AND (? IS NULL OR o.order_date BETWEEN ? AND ?)
+            GROUP BY
+                o.order_id
+        ) AS order_items ON o.order_id = order_items.order_id
+    GROUP BY
+        o.payment_method;
   `;
 
-  queryDatabase(query, [], callback);
+  queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
 const getPopularBikesStatistic = (callback) => {

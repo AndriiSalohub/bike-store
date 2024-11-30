@@ -1,4 +1,4 @@
-import { useBrands } from "../store";
+import { useBikes, useBrands } from "../store";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
@@ -7,6 +7,7 @@ import EditList from "./EditList";
 const BrandsEdit = () => {
   const { toast } = useToast();
   const { brands, fetchBrands, deleteBrand } = useBrands();
+  const { bikes, setBikes } = useBikes();
 
   useEffect(() => {
     fetchBrands();
@@ -16,6 +17,8 @@ const BrandsEdit = () => {
     try {
       await axios.delete(`http://localhost:3000/brands/${brandId}`);
       deleteBrand(brandId);
+
+      setBikes(bikes.filter((bike) => bike.brand_id !== brandId));
       toast({
         title: "Видалення",
         description: `Було успішно видалено бренд ${brandName}`,

@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   ChartPieIcon,
   PackageIcon,
@@ -17,39 +18,73 @@ import {
   ShoppingBagIcon,
   BikeIcon,
 } from "lucide-react";
+import { DatePickerWithRange } from "./ui/dateRangePicker";
 
 const Statistics = () => {
+  const [dateRange, setDateRange] = useState({ from: null, to: null });
+
   const [typesStats, setTypesStats] = useState([]);
   const [brandsStats, setBrandsStats] = useState([]);
   const [ordersStats, setOrdersStats] = useState([]);
   const [bikesStats, setBikesStats] = useState([]);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [typesResponse, brandsResponse, ordersResponse, bikesResponse] =
-          await Promise.all([
-            axios.get("http://localhost:3000/statistics/types"),
-            axios.get("http://localhost:3000/statistics/brands"),
-            axios.get("http://localhost:3000/statistics/orders"),
-            axios.get("http://localhost:3000/statistics/bikes"),
-          ]);
+  const fetchStats = async (startDate, endDate) => {
+    try {
+      const [typesResponse, brandsResponse, ordersResponse, bikesResponse] =
+        await Promise.all([
+          axios.get("http://localhost:3000/statistics/types", {
+            params: { startDate, endDate },
+          }),
+          axios.get("http://localhost:3000/statistics/brands", {
+            params: { startDate, endDate },
+          }),
+          axios.get("http://localhost:3000/statistics/orders", {
+            params: { startDate, endDate },
+          }),
+          axios.get("http://localhost:3000/statistics/bikes"),
+        ]);
 
-        setTypesStats(typesResponse.data);
-        setBrandsStats(brandsResponse.data);
-        setOrdersStats(ordersResponse.data);
-        setBikesStats(bikesResponse.data);
-      } catch (err) {
-        console.error("Error fetching statistics:", err);
-      }
-    };
-    fetchStats();
+      setTypesStats(typesResponse.data);
+      setBrandsStats(brandsResponse.data);
+      setOrdersStats(ordersResponse.data);
+      setBikesStats(bikesResponse.data);
+    } catch (err) {
+      console.error("Error fetching statistics:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (dateRange.from && dateRange.to) {
+      fetchStats(dateRange.from.toISOString(), dateRange.to.toISOString());
+    } else {
+      fetchStats(null, null);
+    }
   }, []);
 
-  console.log(brandsStats);
+  const handleFetchStats = () => {
+    if (dateRange.from && dateRange.to) {
+      fetchStats(dateRange.from.toISOString(), dateRange.to.toISOString());
+    } else {
+      alert("Please select a valid date range");
+      fetchStats(null, null);
+    }
+  };
+
+  const handleFetchAllTimeStats = () => {
+    fetchStats(null, null);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      <div className="flex justify-center space-x-4">
+        <DatePickerWithRange onChange={setDateRange} />
+        <Button onClick={handleFetchStats}>
+          Отримати статистику за обраний період
+        </Button>
+        <Button onClick={handleFetchAllTimeStats}>
+          Отримати статистику за весь час
+        </Button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">

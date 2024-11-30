@@ -6,7 +6,9 @@ const {
 } = require("../models/statsModel");
 
 const getTypesStatistic = (req, res) => {
-  getAllTypesStatistic((err, data) => {
+  const { startDate, endDate } = req.query;
+
+  getAllTypesStatistic(startDate, endDate, (err, data) => {
     if (err) {
       return res.status(500).send("Помилка при отриманні статистики про типи.");
     }
@@ -16,7 +18,9 @@ const getTypesStatistic = (req, res) => {
 };
 
 const getBrandsStatistic = (req, res) => {
-  getAllBrandsStatistic((err, data) => {
+  const { startDate, endDate } = req.query;
+
+  getAllBrandsStatistic(startDate, endDate, (err, data) => {
     if (err) {
       return res
         .status(500)
@@ -28,7 +32,9 @@ const getBrandsStatistic = (req, res) => {
 };
 
 const getOrdersStat = (req, res) => {
-  getOrdersStatistic((err, data) => {
+  const { startDate, endDate } = req.query;
+
+  getOrdersStatistic(startDate, endDate, (err, data) => {
     if (err) {
       return res
         .status(500)

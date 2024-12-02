@@ -1,10 +1,5 @@
 /* eslint-disable react/prop-types */
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,16 +9,42 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { NavLink } from "react-router-dom";
 
 const EditList = ({
+  name,
   title,
   items,
   onDelete,
   editPathKey,
   identifierKey,
   nameKey,
+  addTitle,
+  onAdd,
 }) => {
+  const [isAddDialogOpen, setAddDialogOpen] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+
+  const handleAdd = async () => {
+    if (newItemName.trim() === "") return;
+
+    try {
+      await onAdd(newItemName);
+
+      setAddDialogOpen(false);
+      setNewItemName("");
+    } catch (error) {
+      console.error("Помилка додавання:", error);
+    }
+  };
+
   return (
     <section className="overflow-x-auto p-4">
       <Card>
@@ -85,8 +106,35 @@ const EditList = ({
               </Card>
             ))}
           </div>
+          <Button
+            onClick={() => setAddDialogOpen(true)}
+            className="sm:w-1/2 md:w-1/4 block mx-auto mt-4"
+          >
+            {addTitle}
+          </Button>
         </CardContent>
       </Card>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="mb-2">Додати новий {name}</DialogTitle>
+            <Input
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              placeholder={`Назва нового ${name}у`}
+            />
+            <div className="flex gap-2">
+              <DialogClose className="mt-4">
+                <Button onClick={handleAdd}>Додати</Button>
+              </DialogClose>
+              <DialogClose className="mt-4">
+                <Button onClick={() => setAddDialogOpen(false)}>Закрити</Button>
+              </DialogClose>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

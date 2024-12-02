@@ -3,6 +3,7 @@ const {
   getBrandById,
   updateBrand,
   deleteBrand,
+  addBrand,
 } = require("../models/brandModel");
 
 const getBrands = (req, res) => {
@@ -46,9 +47,24 @@ const deleteBrandRecord = (req, res) => {
   });
 };
 
+const postBrand = (req, res) => {
+  const brandName = req.body.brand_name;
+
+  addBrand(brandName, (err, data) => {
+    if (err) return res.status(500).send(err);
+
+    console.log(data);
+
+    return res
+      .status(201)
+      .send({ brand_id: data.insertId, brand_name: brandName });
+  });
+};
+
 module.exports = {
   getBrands,
   getBrand,
   putBrand,
   deleteBrandRecord,
+  postBrand,
 };

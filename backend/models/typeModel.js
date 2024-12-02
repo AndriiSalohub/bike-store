@@ -24,9 +24,16 @@ const deleteType = (typeId, callback) => {
   queryDatabase(query, [typeId], callback);
 };
 
+const addType = (typeName, callback) => {
+  const query = "INSERT INTO bike_store.type (type_name) VALUES (?)";
+
+  queryDatabase(query, [typeName], callback);
+};
+
 module.exports = {
   getAllTypes,
   getTypeById,
   updateType,
   deleteType,
+  addType,
 };

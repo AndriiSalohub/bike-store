@@ -88,6 +88,11 @@ export const useTypes = create((set) => ({
       types: state.types.filter((type) => type.type_id !== typeId),
     }));
   },
+  addType: (newType) => {
+    set((state) => ({
+      types: [...state.types, newType],
+    }));
+  },
 }));
 
 export const useBrands = create((set) => ({
@@ -106,6 +111,11 @@ export const useBrands = create((set) => ({
   deleteBrand: (brandId) => {
     set((state) => ({
       brands: state.brands.filter((brand) => brand.brand_id !== brandId),
+    }));
+  },
+  addBrand: (newBrand) => {
+    set((state) => ({
+      brands: [...state.brands, newBrand],
     }));
   },
 }));

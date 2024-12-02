@@ -24,9 +24,16 @@ const deleteBrand = (brandId, callback) => {
   queryDatabase(query, [brandId], callback);
 };
 
+const addBrand = (brandName, callback) => {
+  const query = "INSERT INTO bike_store.brand (brand_name) VALUES (?)";
+
+  queryDatabase(query, [brandName], callback);
+};
+
 module.exports = {
   getAllBrands,
   getBrandById,
   updateBrand,
   deleteBrand,
+  addBrand,
 };

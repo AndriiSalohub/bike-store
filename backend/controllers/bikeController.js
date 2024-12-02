@@ -59,9 +59,8 @@ const getBikesWithHighestRating = (req, res) => {
 
 const postBike = (req, res) => {
   const newBike = req.body;
-  console.log(newBike);
 
-  addBike(newBike, (err, result) => {
+  addBike(newBike, (err, data) => {
     if (err) return res.status(500).send(err);
 
     return res.status(201).send({ ...newBike });

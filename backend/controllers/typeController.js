@@ -3,6 +3,7 @@ const {
   updateType,
   getTypeById,
   deleteType,
+  addType,
 } = require("../models/typeModel");
 
 const getTypes = (req, res) => {
@@ -46,9 +47,24 @@ const deleteTypeRecord = (req, res) => {
   });
 };
 
+const postType = (req, res) => {
+  const typeName = req.body.type_name;
+
+  addType(typeName, (err, data) => {
+    if (err) return res.status(500).send(err);
+
+    console.log(data);
+
+    return res
+      .status(201)
+      .send({ type_id: data.insertId, type_name: typeName });
+  });
+};
+
 module.exports = {
   getTypes,
   getType,
   putType,
   deleteTypeRecord,
+  postType,
 };

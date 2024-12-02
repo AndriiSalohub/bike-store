@@ -64,6 +64,9 @@ const BikesEdit = () => {
           <h2 className="text-2xl font-semibold">Редагування Велосипедів</h2>
         </CardHeader>
         <CardContent>
+          <NavLink to="/add" state={{ from: "AddBike" }}>
+            <Button className="block mx-auto mb-4">Додати велосипед</Button>
+          </NavLink>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {bikes.map((bike) => (
               <Card key={bike.bike_id} className="w-full">

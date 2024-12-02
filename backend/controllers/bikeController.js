@@ -4,6 +4,7 @@ const {
   updateBike,
   deleteBike,
   getTopBikes,
+  addBike,
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
@@ -56,10 +57,22 @@ const getBikesWithHighestRating = (req, res) => {
   });
 };
 
+const postBike = (req, res) => {
+  const newBike = req.body;
+  console.log(newBike);
+
+  addBike(newBike, (err, result) => {
+    if (err) return res.status(500).send(err);
+
+    return res.status(201).send({ ...newBike });
+  });
+};
+
 module.exports = {
   getBikes,
   getBike,
   putBike,
   deleteBikeRecord,
   getBikesWithHighestRating,
+  postBike,
 };

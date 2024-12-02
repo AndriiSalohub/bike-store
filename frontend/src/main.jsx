@@ -10,6 +10,7 @@ import ReportsPage from "./pages/ReportsPage.jsx";
 import BikeEditPage from "./pages/BikeEditPage.jsx";
 import TypesEditPage from "./pages/TypeEditPage.jsx";
 import BrandsEditPage from "./pages/BrandEditPage.jsx";
+import AddPage from "./pages/AddPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "edit/brands/:brand_id",
         element: <BrandsEditPage />,
+      },
+      {
+        path: "/add",
+        element: <AddPage />,
       },
     ],
   },

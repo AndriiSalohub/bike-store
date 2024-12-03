@@ -78,6 +78,7 @@ const ReportsPage = () => {
 
   const downloadPDF = async (data, reportTitle, tableColumns, fileName) => {
     let reportData = data;
+    let reportPeriod = "Звіт за весь час";
 
     if (!reportData || reportData.length === 0) {
       if (fileName.includes("sales")) {
@@ -101,7 +102,27 @@ const ReportsPage = () => {
     doc.setFont("Roboto");
     doc.setFontSize(16);
 
+    if (dateRange.from && dateRange.to) {
+      const formattedFrom = new Date(dateRange.from).toLocaleDateString(
+        "uk-UA",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        },
+      );
+      const formattedTo = new Date(dateRange.to).toLocaleDateString("uk-UA", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      reportPeriod = `Звіт за період: ${formattedFrom} - ${formattedTo}`;
+    }
+
     doc.text(reportTitle, 20, 20);
+
+    doc.setFontSize(12);
+    doc.text(reportPeriod, 20, 30);
 
     const tableData = reportData.map((item) =>
       Object.values(item).map((value) => value.toString()),
@@ -110,7 +131,7 @@ const ReportsPage = () => {
     doc.autoTable({
       head: [tableColumns],
       body: tableData,
-      startY: 30,
+      startY: 40,
       styles: {
         font: "Roboto",
         fontStyle: "normal",
@@ -123,17 +144,15 @@ const ReportsPage = () => {
       },
     });
 
+    const tableEndY = doc.lastAutoTable.finalY + 10;
+
     const currentDate = new Date().toLocaleDateString("uk-UA", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
     doc.setFontSize(10);
-    doc.text(
-      `Дата створення звіту: ${currentDate}`,
-      20,
-      doc.internal.pageSize.height - 10,
-    );
+    doc.text(`Дата створення звіту: ${currentDate}`, 20, tableEndY);
 
     doc.save(fileName);
   };

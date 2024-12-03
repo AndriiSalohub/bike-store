@@ -21,23 +21,36 @@ const ReportsPage = () => {
   const [quantityReportData, setQuantityReportData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchSalesReportData = async () => {
-    if (!dateRange.from || !dateRange.to) {
-      alert("Будь ласка, виберіть коректний діапазон дат.");
-      return;
-    }
+  const fetchSalesReportData = async (useDefaultRange = false) => {
     setLoading(true);
     try {
+      const params = useDefaultRange
+        ? {
+            startDate: new Date(new Date().getFullYear(), 0, 1).toISOString(),
+            endDate: new Date().toISOString(),
+          }
+        : dateRange.from && dateRange.to
+          ? {
+              startDate: dateRange.from.toISOString(),
+              endDate: dateRange.to.toISOString(),
+            }
+          : null;
+
+      if (!params && !useDefaultRange) {
+        alert("Будь ласка, виберіть коректний діапазон дат.");
+        setLoading(false);
+        return null;
+      }
+
       const response = await axios.get("http://localhost:3000/reports/sales", {
-        params: {
-          startDate: dateRange.from.toISOString(),
-          endDate: dateRange.to.toISOString(),
-        },
+        params,
       });
       setSalesReportData(response.data);
+      return response.data;
     } catch (error) {
       console.error("Помилка отримання даних:", error);
-      alert("Не вдалося отримати дані звіту.");
+      setLoading(false);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -50,18 +63,34 @@ const ReportsPage = () => {
         "http://localhost:3000/reports/quantity",
       );
       setQuantityReportData(response.data);
+      return response.data;
     } catch (error) {
       console.error(
         "Помилка отримання даних для звіту про кількість товару:",
         error,
       );
-      alert("Не вдалося отримати дані для звіту про кількість товару.");
+      setLoading(false);
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
-  const downloadPDF = (data, reportTitle, tableColumns, fileName) => {
+  const downloadPDF = async (data, reportTitle, tableColumns, fileName) => {
+    let reportData = data;
+
+    if (!reportData || reportData.length === 0) {
+      if (fileName.includes("sales")) {
+        reportData = await fetchSalesReportData(true);
+      } else if (fileName.includes("quantity")) {
+        reportData = await fetchQuantityReportData();
+      }
+    }
+
+    if (!reportData || reportData.length === 0) {
+      return;
+    }
+
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -74,7 +103,7 @@ const ReportsPage = () => {
 
     doc.text(reportTitle, 20, 20);
 
-    const tableData = data.map((item) =>
+    const tableData = reportData.map((item) =>
       Object.values(item).map((value) => value.toString()),
     );
 
@@ -94,6 +123,18 @@ const ReportsPage = () => {
       },
     });
 
+    const currentDate = new Date().toLocaleDateString("uk-UA", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    doc.setFontSize(10);
+    doc.text(
+      `Дата створення звіту: ${currentDate}`,
+      20,
+      doc.internal.pageSize.height - 10,
+    );
+
     doc.save(fileName);
   };
 
@@ -104,7 +145,7 @@ const ReportsPage = () => {
       </h1>
       <div className="flex space-x-4 mb-6">
         <DatePickerWithRange onChange={setDateRange} />
-        <Button onClick={fetchSalesReportData} disabled={loading}>
+        <Button onClick={() => fetchSalesReportData()} disabled={loading}>
           {loading ? "Отримується..." : "Звіт по продажах"}
         </Button>
         <Button onClick={fetchQuantityReportData} disabled={loading}>
@@ -150,9 +191,8 @@ const ReportsPage = () => {
           Завантажити PDF (Кількість товару)
         </Button>
       </div>
-      <div className="bg-white shadow-md rounded p-4">
-        {/* Sales Report Table */}
-        {salesReportData.length > 0 ? (
+      {salesReportData.length > 0 && (
+        <div className="bg-white shadow-md rounded p-4">
           <Table>
             <TableHeader>
               <TableRow>
@@ -175,17 +215,10 @@ const ReportsPage = () => {
               ))}
             </TableBody>
           </Table>
-        ) : (
-          <p className="text-center text-gray-500">
-            {loading
-              ? "Завантаження даних..."
-              : "Немає доступних даних звіту по продажах."}
-          </p>
-        )}
-      </div>
-      <div className="bg-white shadow-md rounded p-4 mt-6">
-        {/* Quantity Report Table */}
-        {quantityReportData.length > 0 ? (
+        </div>
+      )}
+      {quantityReportData.length > 0 && (
+        <div className="bg-white shadow-md rounded p-4 mt-6">
           <Table>
             <TableHeader>
               <TableRow>
@@ -212,14 +245,8 @@ const ReportsPage = () => {
               ))}
             </TableBody>
           </Table>
-        ) : (
-          <p className="text-center text-gray-500">
-            {loading
-              ? "Завантаження даних..."
-              : "Немає доступних даних звіту по кількості товару."}
-          </p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

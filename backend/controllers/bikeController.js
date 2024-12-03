@@ -8,10 +8,13 @@ const {
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
-  getAllBikes((err, data) => {
+  const filters = req.query;
+
+  getAllBikes(filters, (err, data) => {
     if (err) {
       return res.status(500).send("Помилка при отриманні списку велосипедів.");
     }
+
     return res.send(data);
   });
 };

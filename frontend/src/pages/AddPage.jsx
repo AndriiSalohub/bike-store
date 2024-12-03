@@ -5,13 +5,7 @@ const AddPage = () => {
   const location = useLocation();
   const { from } = location.state || {};
 
-  return (
-    <>
-      {from === "AddBike" && <AddBike />}
-      {/* {from === "AddCart" && <AddToCart />} */}
-      {/* {from === "AddBikeCart" && <AddBikeCart />} */}
-    </>
-  );
+  return <>{from === "AddBike" && <AddBike />}</>;
 };
 
 export default AddPage;

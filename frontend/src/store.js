@@ -54,9 +54,11 @@ export const useAuth = create((set) => ({
 
 export const useBikes = create((set) => ({
   bikes: [],
-  fetchBikes: async () => {
+  fetchBikes: async (filters) => {
     try {
-      const response = await axios.get("http://localhost:3000/bikes");
+      const response = await axios.get("http://localhost:3000/bikes", {
+        params: filters,
+      });
       set(() => ({ bikes: response.data }));
     } catch (error) {
       console.error("Помилка отримання велосипедів:", error);
@@ -117,5 +119,50 @@ export const useBrands = create((set) => ({
     set((state) => ({
       brands: [...state.brands, newBrand],
     }));
+  },
+}));
+
+export const useGenders = create((set) => ({
+  genders: [],
+  fetchGenders: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/genders");
+
+      set(() => ({
+        genders: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про статі:", error);
+    }
+  },
+}));
+
+export const useWheelSizes = create((set) => ({
+  wheelSizes: [],
+  fetchWheelSizes: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/wheel_sizes");
+
+      set(() => ({
+        wheelSizes: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про розміри колес:", error);
+    }
+  },
+}));
+
+export const useColors = create((set) => ({
+  colors: [],
+  fetchColors: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/colors");
+
+      set(() => ({
+        colors: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про кольори:", error);
+    }
   },
 }));

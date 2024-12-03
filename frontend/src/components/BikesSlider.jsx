@@ -43,7 +43,11 @@ const BikesSlider = () => {
                     alt={bike.bike_model}
                     className="mix-blend-multiply"
                   />
-                  <NavLink to={bike.bike_model + "_" + bike.bike_color}>
+                  <NavLink
+                    to={`/bikes/${
+                      bike.bike_model.split(" ").join("") + bike.bike_color
+                    }`}
+                  >
                     <h3 className="text-sm mt-4 font-bold">
                       {bike.bike_model}
                     </h3>

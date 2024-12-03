@@ -21,7 +21,7 @@ const AddBike = () => {
   const [bikeDetails, setBikeDetails] = useState({
     bike_model: "",
     bike_price: "",
-    bike_color: "", // Add bike_color to the state
+    bike_color: "",
     bike_quantity: "",
     bike_weight: "",
     wheel_size: "",

@@ -1,9 +1,54 @@
 const { queryDatabase } = require("../db/db");
 
-const getAllBikes = (callback) => {
-  const query = "SELECT * FROM bike_store.bike";
+const getAllBikes = (filters, callback) => {
+  let query = `
+    SELECT * FROM bike_store.bike 
+    WHERE 1=1
+  `;
 
-  queryDatabase(query, [], callback);
+  const queryParams = [];
+
+  if (filters.types && filters.types.length > 0) {
+    query += ` AND type_id IN (SELECT type_id FROM bike_store.type WHERE type_name IN (?))`;
+    queryParams.push(filters.types);
+  }
+
+  if (filters.brands && filters.brands.length > 0) {
+    query += ` AND brand_id IN (SELECT brand_id FROM bike_store.brand WHERE brand_name IN (?))`;
+    queryParams.push(filters.brands);
+  }
+
+  if (filters.genders && filters.genders.length > 0) {
+    query += ` AND gender IN (?)`;
+    queryParams.push(filters.genders);
+  }
+
+  if (filters.wheelSizes && filters.wheelSizes.length > 0) {
+    query += ` AND wheel_size IN (?)`;
+    queryParams.push(filters.wheelSizes);
+  }
+
+  if (filters.colors && filters.colors.length > 0) {
+    query += ` AND bike_color IN (?)`;
+    queryParams.push(filters.colors);
+  }
+
+  if (filters.price) {
+    query += ` AND bike_price BETWEEN ? AND ?`;
+    queryParams.push(filters.price[0], filters.price[1]);
+  }
+
+  if (filters.rating) {
+    query += ` AND bike_rating BETWEEN ? AND ?`;
+    queryParams.push(filters.rating[0], filters.rating[1]);
+  }
+
+  if (filters.weight) {
+    query += ` AND bike_weight BETWEEN ? AND ?`;
+    queryParams.push(filters.weight[0], filters.weight[1]);
+  }
+
+  queryDatabase(query, queryParams, callback);
 };
 
 const getBikeById = (bikeId, callback) => {
@@ -66,6 +111,12 @@ const addBike = (newBike, callback) => {
   queryDatabase(query, values, callback);
 };
 
+const getDistinctGenders = (callback) => {
+  const query = "SELECT DISTINCT gender FROM bike_store.bike";
+
+  queryDatabase(query, [], callback);
+};
+
 module.exports = {
   getAllBikes,
   getBikeById,
@@ -73,4 +124,5 @@ module.exports = {
   deleteBike,
   getTopBikes,
   addBike,
+  getDistinctGenders,
 };

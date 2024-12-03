@@ -31,17 +31,69 @@ const EditList = ({
 }) => {
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [error, setError] = useState("");
+
+  const validateItemName = (name) => {
+    setError("");
+
+    if (!name.trim()) {
+      setError(`Назва ${name} не може бути порожньою`);
+      return false;
+    }
+
+    if (name.trim().length < 2) {
+      setError(`Назва ${name} повинна містити щонайменше 2 символи`);
+      return false;
+    }
+
+    if (name.trim().length > 50) {
+      setError(`Назва ${name} не може перевищувати 50 символів`);
+      return false;
+    }
+
+    const validNameRegex = /^[а-яА-ЯіІєЄґҐa-zA-Z\s\-]+$/;
+    if (!validNameRegex.test(name.trim())) {
+      setError(`Назва ${name} може містити лише літери, пробіли та дефіс`);
+      return false;
+    }
+
+    const isDuplicate = items.some(
+      (item) =>
+        item[nameKey].toLowerCase().trim() === name.toLowerCase().trim(),
+    );
+
+    if (isDuplicate) {
+      setError(`${name} вже існує`);
+      return false;
+    }
+
+    return true;
+  };
 
   const handleAdd = async () => {
     if (newItemName.trim() === "") return;
+
+    if (!validateItemName(newItemName)) {
+      return;
+    }
 
     try {
       await onAdd(newItemName);
 
       setAddDialogOpen(false);
       setNewItemName("");
+      setError("");
     } catch (error) {
       console.error("Помилка додавання:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setNewItemName(value);
+
+    if (error) {
+      setError("");
     }
   };
 
@@ -121,13 +173,15 @@ const EditList = ({
             <DialogTitle className="mb-2">Додати новий {name}</DialogTitle>
             <Input
               value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
+              onChange={handleInputChange}
               placeholder={`Назва нового ${name}у`}
+              error={!!error}
             />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
             <div className="flex gap-2">
-              <DialogClose className="mt-4">
-                <Button onClick={handleAdd}>Додати</Button>
-              </DialogClose>
+              <Button onClick={handleAdd} className="mt-4">
+                Додати
+              </Button>
               <DialogClose className="mt-4">
                 <Button onClick={() => setAddDialogOpen(false)}>Закрити</Button>
               </DialogClose>

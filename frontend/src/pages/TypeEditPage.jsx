@@ -46,16 +46,31 @@ const EditTypePage = () => {
     fetchTypeData();
   }, [typeId]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setType((prev) => ({ ...prev, [name]: value }));
-  };
-
   const validate = () => {
     const newErrors = {};
-    if (!type.type_name) newErrors.type_name = "Назва типу є обов'язковою!";
+
+    if (!type.type_name) {
+      newErrors.type_name = "Назва типу є обов'язковою!";
+    } else if (type.type_name.length < 2) {
+      newErrors.type_name = "Назва типу має бути не менше 2 символів.";
+    } else if (type.type_name.length > 50) {
+      newErrors.type_name = "Назва типу не може перевищувати 50 символів.";
+    } else if (!/^[а-яА-ЯіІєЄґҐ\s\-]+$/.test(type.type_name)) {
+      newErrors.type_name =
+        "Назва типу може містити лише літери, пробіли та дефіс.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setType((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSaveChanges = async (e) => {
@@ -105,7 +120,7 @@ const EditTypePage = () => {
                   disabled={key === "type_id"}
                 />
                 {errors[key] && (
-                  <div className="text-red-600 text-sm">{errors[key]}</div>
+                  <div className="text-red-600 text-xs">{errors[key]}</div>
                 )}
               </div>
             ))}

@@ -44,17 +44,31 @@ const EditBrandPage = () => {
     fetchBrandData();
   }, [brandId]);
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!brand.brand_name) {
+      newErrors.brand_name = "Назва бренду є обов'язковою!";
+    } else if (brand.brand_name.length < 2) {
+      newErrors.brand_name = "Назва бренду має бути не менше 2 символів.";
+    } else if (brand.brand_name.length > 50) {
+      newErrors.brand_name = "Назва бренду не може перевищувати 50 символів.";
+    } else if (!/^[а-яА-ЯіІєЄґҐa-zA-Z\s\-]+$/.test(brand.brand_name)) {
+      newErrors.brand_name =
+        "Назва бренду може містити літери, пробіли та дефіс.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setBrand((prev) => ({ ...prev, [name]: value }));
-  };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!brand.brand_name)
-      newErrors.brand_name = "Назва бренду є обов'язковою!";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSaveChanges = async (e) => {
@@ -104,7 +118,7 @@ const EditBrandPage = () => {
                   disabled={key === "brand_id"}
                 />
                 {errors[key] && (
-                  <div className="text-red-600 text-sm">{errors[key]}</div>
+                  <div className="text-red-600 text-xs">{errors[key]}</div>
                 )}
               </div>
             ))}

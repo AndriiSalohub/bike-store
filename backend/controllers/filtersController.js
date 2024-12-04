@@ -2,6 +2,8 @@ const {
   getDistinctGenders,
   getDistinctWheelSizes,
   getDistinctColors,
+  getMinMaxPrice,
+  getMinMaxBikeWeight,
 } = require("../models/filtersModel");
 
 const getGenders = (req, res) => {
@@ -34,8 +36,34 @@ const getColors = (req, res) => {
   });
 };
 
+const getPriceLimits = (req, res) => {
+  getMinMaxPrice((err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .send("Помилка при мінімальної і максимальної ціни.");
+    }
+
+    return res.send(data);
+  });
+};
+
+const getWeightLimits = (req, res) => {
+  getMinMaxBikeWeight((err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .send("Помилка при максимальної і мінімальної ваги велосипеда.");
+    }
+
+    return res.send(data);
+  });
+};
+
 module.exports = {
   getGenders,
   getWheelSizes,
   getColors,
+  getPriceLimits,
+  getWeightLimits,
 };

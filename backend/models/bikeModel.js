@@ -5,7 +5,6 @@ const getAllBikes = (filters, callback) => {
     SELECT * FROM bike_store.bike 
     WHERE 1=1
   `;
-
   const queryParams = [];
 
   if (filters.types && filters.types.length > 0) {

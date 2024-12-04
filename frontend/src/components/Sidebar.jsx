@@ -12,8 +12,16 @@ import {
   useTypes,
   useWheelSizes,
 } from "../store";
+import { Button } from "@/components/ui/button";
 
-const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
+const Sidebar = ({
+  filters,
+  onFilterChange,
+  onRangeFilterChange,
+  onClearFilters,
+  priceRange,
+  weightRange,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { types, fetchTypes } = useTypes();
@@ -92,6 +100,10 @@ const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
     onRangeFilterChange(section, values);
   }, []);
 
+  const clearFilters = () => {
+    onClearFilters();
+  };
+
   const renderSection = (title, items, section, ref, isOpen) => {
     let processedItems;
 
@@ -127,7 +139,7 @@ const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
             height: isOpen ? `${heights[section]}px` : "0px",
           }}
         >
-          {processedItems.map((item, index) => {
+          {processedItems.map((item) => {
             const key = item.type_id || item.brand_id || item;
             const displayName = item.type_name || item.brand_name || item;
 
@@ -212,6 +224,9 @@ const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
         {isOpen ? <RxCross2 /> : <IoMenu />}
       </button>
       <aside className={`filter-sidebar ${isOpen ? "is-open" : ""}`}>
+        <Button className="block mx-auto" onClick={clearFilters}>
+          Очистити всі фільтри
+        </Button>
         {renderSection("Типи", types, "types", refs.types, sectionStates.types)}
         {renderSection(
           "Бренди",
@@ -220,7 +235,15 @@ const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
           refs.brands,
           sectionStates.brands,
         )}
-        {renderRangeSection("Ціна", "price", 0, 10000, 100, " $")}
+        {priceRange.length > 0 &&
+          renderRangeSection(
+            "Ціна",
+            "price",
+            priceRange[0],
+            priceRange[1],
+            10,
+            " ₴",
+          )}
         {renderSection(
           "Статі",
           genders,
@@ -243,7 +266,15 @@ const Sidebar = ({ filters, onFilterChange, onRangeFilterChange }) => {
           refs.wheelSizes,
           sectionStates.wheelSizes,
         )}
-        {renderRangeSection("Вага", "weight", 0, 30, 0.1, " кг")}
+        {weightRange.length > 0 &&
+          renderRangeSection(
+            "Вага",
+            "weight",
+            weightRange[0],
+            weightRange[1],
+            0.1,
+            " кг",
+          )}
       </aside>
     </>
   );

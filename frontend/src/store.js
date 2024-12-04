@@ -54,10 +54,13 @@ export const useAuth = create((set) => ({
 
 export const useBikes = create((set) => ({
   bikes: [],
-  fetchBikes: async (filters) => {
+  fetchBikes: async (filters, sorting) => {
     try {
       const response = await axios.get("http://localhost:3000/bikes", {
-        params: filters,
+        params: {
+          filters: JSON.stringify(filters),
+          sorting,
+        },
       });
       set(() => ({ bikes: response.data }));
     } catch (error) {

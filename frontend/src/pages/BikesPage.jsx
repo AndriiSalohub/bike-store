@@ -94,7 +94,7 @@ const BikesPage = () => {
 
   return (
     <>
-      <section className="flex items-start">
+      <main className="flex items-start">
         <Sidebar
           filters={filters}
           onFilterChange={handleFilterChange}
@@ -104,7 +104,7 @@ const BikesPage = () => {
           weightRange={weightRange}
         />
         <BikesList filters={filters} />
-      </section>
+      </main>
     </>
   );
 };

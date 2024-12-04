@@ -8,9 +8,10 @@ const {
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
-  const filters = req.query;
+  const filters = JSON.parse(req.query.filters);
+  const sorting = req.query.sorting;
 
-  getAllBikes(filters, (err, data) => {
+  getAllBikes(filters, sorting, (err, data) => {
     if (err) {
       return res.status(500).send("Помилка при отриманні списку велосипедів.");
     }

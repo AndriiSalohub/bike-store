@@ -1,6 +1,6 @@
 const { queryDatabase } = require("../db/db");
 
-const getAllBikes = (filters, callback) => {
+const getAllBikes = (filters, sorting, callback) => {
   let query = `
     SELECT * FROM bike_store.bike 
     WHERE 1=1
@@ -45,6 +45,16 @@ const getAllBikes = (filters, callback) => {
   if (filters.weight) {
     query += ` AND bike_weight BETWEEN ? AND ?`;
     queryParams.push(filters.weight[0], filters.weight[1]);
+  }
+
+  if (sorting) {
+    if (sorting === "price_desc") {
+      query += " ORDER BY bike_price DESC";
+    } else if (sorting === "price_asc") {
+      query += " ORDER BY bike_price ASC";
+    } else if (sorting === "rating") {
+      query += " ORDER BY bike_rating DESC";
+    }
   }
 
   queryDatabase(query, queryParams, callback);

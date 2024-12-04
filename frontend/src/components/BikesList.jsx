@@ -1,24 +1,57 @@
 /* eslint-disable react/prop-types */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBikes } from "../store";
 import BikesListItem from "./BikesListItem";
 import { AnimatePresence } from "framer-motion";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const BikesList = ({ filters }) => {
   const { bikes, fetchBikes } = useBikes();
+  const [sorting, setSorting] = useState(null);
 
   useEffect(() => {
-    fetchBikes(filters);
-  }, [filters]);
+    fetchBikes(filters, sorting);
+  }, [filters, sorting]);
+
+  console.log(sorting);
 
   return (
-    <AnimatePresence>
-      <ul className="w-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {bikes.map((bike) => (
-          <BikesListItem key={bike.bike_id} {...bike} />
-        ))}
-      </ul>
-    </AnimatePresence>
+    <section className="w-full">
+      <div className="flex justify-end mb-4 mr-4">
+        <Select onValueChange={(val) => setSorting(val)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Сортування" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Сортування</SelectLabel>
+              <SelectItem value="price_asc">
+                Ціна: від низької до високої
+              </SelectItem>
+              <SelectItem value="price_desc">
+                Ціна: від високої до низької
+              </SelectItem>
+              <SelectItem value="rating">За рейтингом</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <AnimatePresence>
+        <ul className="w-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {bikes.map((bike) => (
+            <BikesListItem key={bike.bike_id} {...bike} />
+          ))}
+        </ul>
+      </AnimatePresence>
+    </section>
   );
 };
 

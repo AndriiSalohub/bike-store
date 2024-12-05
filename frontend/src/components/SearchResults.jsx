@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
 import { NavLink } from "react-router-dom";
 
-const SearchResults = ({ results }) => {
-  // If no results, show a message
+const SearchResults = ({ results, role }) => {
   if (results.length === 0) {
     return (
       <div className="search-results search-results--empty">
@@ -26,7 +25,11 @@ const SearchResults = ({ results }) => {
         }) => (
           <NavLink
             key={bike_id}
-            to={`/bikes/${bike_model.split(" ").join("") + bike_color}`}
+            to={
+              role === "Адмін"
+                ? `/edit/bikes/${bike_id}`
+                : `/bikes/${bike_model.split(" ").join("") + bike_color}`
+            }
             className="search-result"
           >
             <div className="search-result__info">

@@ -7,53 +7,62 @@ const getAllBikes = (filters, sorting, callback) => {
   `;
   const queryParams = [];
 
-  if (filters.types && filters.types.length > 0) {
-    query += ` AND type_id IN (SELECT type_id FROM bike_store.type WHERE type_name IN (?))`;
-    queryParams.push(filters.types);
-  }
+  if (filters) {
+    if (filters.types && filters.types.length > 0) {
+      query += ` AND type_id IN (SELECT type_id FROM bike_store.type WHERE type_name IN (?))`;
+      queryParams.push(filters.types);
+    }
 
-  if (filters.brands && filters.brands.length > 0) {
-    query += ` AND brand_id IN (SELECT brand_id FROM bike_store.brand WHERE brand_name IN (?))`;
-    queryParams.push(filters.brands);
-  }
+    if (filters.brands && filters.brands.length > 0) {
+      query += ` AND brand_id IN (SELECT brand_id FROM bike_store.brand WHERE brand_name IN (?))`;
+      queryParams.push(filters.brands);
+    }
 
-  if (filters.genders && filters.genders.length > 0) {
-    query += ` AND gender IN (?)`;
-    queryParams.push(filters.genders);
-  }
+    if (filters.genders && filters.genders.length > 0) {
+      query += ` AND gender IN (?)`;
+      queryParams.push(filters.genders);
+    }
 
-  if (filters.wheelSizes && filters.wheelSizes.length > 0) {
-    query += ` AND wheel_size IN (?)`;
-    queryParams.push(filters.wheelSizes);
-  }
+    if (filters.wheelSizes && filters.wheelSizes.length > 0) {
+      query += ` AND wheel_size IN (?)`;
+      queryParams.push(filters.wheelSizes);
+    }
 
-  if (filters.colors && filters.colors.length > 0) {
-    query += ` AND bike_color IN (?)`;
-    queryParams.push(filters.colors);
-  }
+    if (filters.colors && filters.colors.length > 0) {
+      query += ` AND bike_color IN (?)`;
+      queryParams.push(filters.colors);
+    }
 
-  if (filters.price) {
-    query += ` AND bike_price BETWEEN ? AND ?`;
-    queryParams.push(filters.price[0], filters.price[1]);
-  }
+    if (filters.price) {
+      query += ` AND bike_price BETWEEN ? AND ?`;
+      queryParams.push(filters.price[0], filters.price[1]);
+    }
 
-  if (filters.rating) {
-    query += ` AND bike_rating BETWEEN ? AND ?`;
-    queryParams.push(filters.rating[0], filters.rating[1]);
-  }
+    if (filters.rating) {
+      query += ` AND bike_rating BETWEEN ? AND ?`;
+      queryParams.push(filters.rating[0], filters.rating[1]);
+    }
 
-  if (filters.weight) {
-    query += ` AND bike_weight BETWEEN ? AND ?`;
-    queryParams.push(filters.weight[0], filters.weight[1]);
+    if (filters.weight) {
+      query += ` AND bike_weight BETWEEN ? AND ?`;
+      queryParams.push(filters.weight[0], filters.weight[1]);
+    }
   }
 
   if (sorting) {
-    if (sorting === "price_desc") {
-      query += " ORDER BY bike_price DESC";
-    } else if (sorting === "price_asc") {
-      query += " ORDER BY bike_price ASC";
-    } else if (sorting === "rating") {
-      query += " ORDER BY bike_rating DESC";
+    switch (sorting) {
+      case "price_desc":
+        query += " ORDER BY bike_price DESC";
+        break;
+      case "price_asc":
+        query += " ORDER BY bike_price ASC";
+        break;
+      case "rating":
+        query += " ORDER BY bike_rating DESC";
+        break;
+      case "default":
+      default:
+        break;
     }
   }
 

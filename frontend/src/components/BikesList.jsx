@@ -61,6 +61,7 @@ const BikesList = ({ filters }) => {
                 Ціна: від високої до низької
               </SelectItem>
               <SelectItem value="rating">За рейтингом</SelectItem>
+              <SelectItem value="default">За замовчуванням</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

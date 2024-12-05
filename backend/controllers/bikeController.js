@@ -8,7 +8,7 @@ const {
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
-  const filters = JSON.parse(req.query.filters);
+  const filters = req.query.filters ? JSON.parse(req.query.filters) : null;
   const sorting = req.query.sorting;
 
   getAllBikes(filters, sorting, (err, data) => {

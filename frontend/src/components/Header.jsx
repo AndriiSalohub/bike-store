@@ -80,8 +80,12 @@ const Header = () => {
   }, [user]);
 
   const handleSearchChange = (search) => {
-    changeSearchTerm(search);
-    setSearch(search);
+    setShowSearchResults(false);
+
+    setTimeout(() => {
+      changeSearchTerm(search);
+      setShowSearchResults(true);
+    }, 50);
   };
 
   const handleKeyPress = (e) => {
@@ -124,7 +128,7 @@ const Header = () => {
               >
                 x
               </button>
-              <SearchResults results={searchResults} />
+              <SearchResults results={searchResults} role={user?.user_role} />
             </div>
           )}
         </div>

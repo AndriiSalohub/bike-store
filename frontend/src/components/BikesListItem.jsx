@@ -39,7 +39,7 @@ const BikesListItem = ({
 
         setInBag(response.data.isInCart);
       } catch (error) {
-        console.error("Error checking cart status:", error);
+        console.error("Помилка перевірки статусу кошика:", error);
       }
     };
 

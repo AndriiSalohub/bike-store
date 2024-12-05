@@ -15,6 +15,7 @@ const reportsRoutes = require("./routes/reportsRoutes");
 const filtersRoutes = require("./routes/filtersRoutes");
 const searchRoutes = require("./routes/searchRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
 app.use(express.json());
@@ -50,6 +51,7 @@ app.use("", reportsRoutes);
 app.use("", filtersRoutes);
 app.use("", searchRoutes);
 app.use("", cartRoutes);
+app.use("", orderRoutes);
 
 app.get("/session", (req, res) => {
   if (req.session.user) {

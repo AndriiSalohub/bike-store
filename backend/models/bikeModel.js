@@ -3,7 +3,7 @@ const { queryDatabase } = require("../db/db");
 const getAllBikes = (filters, sorting, callback) => {
   let query = `
     SELECT * FROM bike_store.bike 
-    WHERE 1=1
+    WHERE bike_quantity > 0
   `;
   const queryParams = [];
 

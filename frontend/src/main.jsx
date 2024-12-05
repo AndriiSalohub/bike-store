@@ -11,6 +11,8 @@ import BikeEditPage from "./pages/BikeEditPage.jsx";
 import TypesEditPage from "./pages/TypeEditPage.jsx";
 import BrandsEditPage from "./pages/BrandEditPage.jsx";
 import AddPage from "./pages/AddPage.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import OrderHistoryPage from "./pages/OrderHistoryPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
       {
         path: "/add",
         element: <AddPage />,
+      },
+      {
+        path: "/cart",
+        element: <CartPage />,
+      },
+      {
+        path: "/order-history",
+        element: <OrderHistoryPage />,
       },
     ],
   },

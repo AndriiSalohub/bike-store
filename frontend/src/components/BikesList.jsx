@@ -33,6 +33,7 @@ const BikesList = ({ filters }) => {
           },
         });
 
+        console.log(user);
         if (user) {
           setCartId(response.data[0].cart_id);
         }

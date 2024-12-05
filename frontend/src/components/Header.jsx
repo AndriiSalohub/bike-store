@@ -156,7 +156,7 @@ const Header = () => {
         </div>
         {isAuth && user?.user_role === "Користувач" && (
           <div id="icons-div">
-            <NavLink to="/bag" className="header__in-bag" id="bag">
+            <NavLink to="/cart" className="header__in-bag" id="bag">
               <MdOutlineShoppingBag size={37} />
               <span className="header__in-bag-number">{cartItemCount}</span>
             </NavLink>

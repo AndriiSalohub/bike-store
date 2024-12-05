@@ -5,6 +5,7 @@ const {
   getUser,
   addUser,
 } = require("../models/authModel");
+const { createCartOnRegister } = require("./cartContorller");
 
 const registerUser = async (req, res) => {
   const { username, email, password, role } = req.body;
@@ -32,7 +33,16 @@ const registerUser = async (req, res) => {
 
         addUser([email, hashedpassword, role, username], (err) => {
           if (err) return res.status(500).send("Помилка на сервері.");
-          res.send("Користувач успішно зареєстрований!");
+
+          createCartOnRegister(email, role, (cartErr, cart) => {
+            if (cartErr) {
+              return res.status(500).send("Помилка створення кошика.");
+            }
+
+            res.send(
+              `Користувач успішно зареєстрований і для нього створено корзину ${cart.cart_id}!`,
+            );
+          });
         });
       });
     });

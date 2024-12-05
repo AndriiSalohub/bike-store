@@ -40,7 +40,7 @@ const BikesPage = () => {
           weight: [minWeight, maxWeight],
         }));
       } catch (error) {
-        console.lor(
+        console.log(
           "Помилка отримання даних про мінімальну і максимальну вагу",
           error,
         );

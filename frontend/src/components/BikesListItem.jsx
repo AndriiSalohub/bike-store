@@ -5,25 +5,63 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useTypes } from "../store";
+import { useCart, useTypes } from "../store";
 import { useEffect, useState } from "react";
 import { MdOutlineShoppingBag, MdShoppingBag } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const BikesListItem = ({
+  bike_id,
   bike_model,
   type_id,
   bike_price,
   bike_image_url,
   bike_color,
+  cartId,
 }) => {
   const { types, fetchTypes } = useTypes();
   const [inBag, setInBag] = useState(false);
+  const { updateCartItemCount } = useCart();
 
   useEffect(() => {
     fetchTypes();
-  }, []);
+
+    const checkCartStatus = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/cart/status", {
+          params: {
+            bikeId: bike_id,
+            cartId: cartId,
+          },
+        });
+
+        setInBag(response.data.isInCart);
+      } catch (error) {
+        console.error("Error checking cart status:", error);
+      }
+    };
+
+    if (cartId) {
+      checkCartStatus();
+    }
+  }, [bike_id, cartId]);
+
+  const handleAddToBike = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/bike_cart", {
+        bikeId: bike_id,
+        cartId: cartId,
+        quantity: 1,
+      });
+
+      setInBag(response.data.isInCart);
+      updateCartItemCount(response.data.isInCart ? 1 : -1);
+    } catch (error) {
+      console.error("Error adding/removing from cart:", error);
+    }
+  };
 
   return (
     <Card className="p-4">
@@ -63,27 +101,31 @@ const BikesListItem = ({
               {types?.find((type) => type.type_id == type_id)?.type_name}
             </CardDescription>
           </CardHeader>
-          <div className="flex justify-between items-center px-6">
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="font-bold"
-            >
-              {bike_price} ₴
-            </motion.span>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              {inBag ? (
-                <MdShoppingBag size={25} />
-              ) : (
-                <MdOutlineShoppingBag size={25} />
-              )}
-            </motion.button>
-          </div>
         </NavLink>
+        <div className="flex justify-between items-center px-6">
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="font-bold"
+          >
+            {bike_price} ₴
+          </motion.span>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.preventDefault();
+              handleAddToBike();
+            }}
+          >
+            {inBag ? (
+              <MdShoppingBag size={25} />
+            ) : (
+              <MdOutlineShoppingBag size={25} />
+            )}
+          </motion.button>
+        </div>
       </motion.div>
     </Card>
   );

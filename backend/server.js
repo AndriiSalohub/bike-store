@@ -13,6 +13,8 @@ const typeRoutes = require("./routes/typeRoutes");
 const brandRoutes = require("./routes/brandRoutes");
 const reportsRoutes = require("./routes/reportsRoutes");
 const filtersRoutes = require("./routes/filtersRoutes");
+const searchRoutes = require("./routes/searchRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 const app = express();
 app.use(express.json());
@@ -46,6 +48,8 @@ app.use("", typeRoutes);
 app.use("", brandRoutes);
 app.use("", reportsRoutes);
 app.use("", filtersRoutes);
+app.use("", searchRoutes);
+app.use("", cartRoutes);
 
 app.get("/session", (req, res) => {
   if (req.session.user) {

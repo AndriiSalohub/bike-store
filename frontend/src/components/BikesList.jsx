@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
-import { useBikes } from "../store";
+import { useAuth, useBikes } from "../store";
 import BikesListItem from "./BikesListItem";
 import { AnimatePresence } from "framer-motion";
 import {
@@ -12,16 +12,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import axios from "axios";
 
 const BikesList = ({ filters }) => {
   const { bikes, fetchBikes } = useBikes();
+  const { user } = useAuth();
   const [sorting, setSorting] = useState(null);
+  const [cartId, setCartId] = useState();
 
   useEffect(() => {
     fetchBikes(filters, sorting);
   }, [filters, sorting]);
 
-  console.log(sorting);
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/cart", {
+          params: {
+            email: user?.user_email,
+          },
+        });
+
+        if (user) {
+          setCartId(response.data[0].cart_id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchCart();
+  }, [user]);
 
   return (
     <section className="w-full">
@@ -47,7 +68,7 @@ const BikesList = ({ filters }) => {
       <AnimatePresence>
         <ul className="w-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {bikes.map((bike) => (
-            <BikesListItem key={bike.bike_id} {...bike} />
+            <BikesListItem key={bike.bike_id} {...bike} cartId={cartId} />
           ))}
         </ul>
       </AnimatePresence>

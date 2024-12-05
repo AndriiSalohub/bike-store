@@ -169,3 +169,22 @@ export const useColors = create((set) => ({
     }
   },
 }));
+
+export const useSearch = create((set) => ({
+  searchTerm: "",
+  changeSearchTerm: (term) => {
+    set(() => ({
+      searchTerm: term,
+    }));
+  },
+}));
+
+export const useCart = create((set) => ({
+  cartItemCount: 0,
+
+  updateCartItemCount: (change) => {
+    set((state) => ({
+      cartItemCount: state.cartItemCount + change,
+    }));
+  },
+}));

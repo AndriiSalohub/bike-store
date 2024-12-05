@@ -14,6 +14,7 @@ const getAllEmails = (email, callback) => {
 const addUser = (newUser, callback) => {
   const query =
     "INSERT INTO bike_store.user (user_email, user_password, user_role, user_name) VALUES(?, ?, ?, ?)";
+
   queryDatabase(query, newUser, callback);
 };
 

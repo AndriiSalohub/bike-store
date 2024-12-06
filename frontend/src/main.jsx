@@ -13,6 +13,7 @@ import BrandsEditPage from "./pages/BrandEditPage.jsx";
 import AddPage from "./pages/AddPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import OrderHistoryPage from "./pages/OrderHistoryPage.jsx";
+import BikeDetails from "./pages/BikeDetails.jsx";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "bikes",
         element: <BikesPage />,
+      },
+      {
+        path: "/bikes/:bike_id",
+        element: <BikeDetails />,
       },
       {
         path: "edit",

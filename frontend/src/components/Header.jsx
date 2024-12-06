@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { MdOutlineShoppingBag, MdSearch } from "react-icons/md";
+import { MdOutlineShoppingBag, MdSearch, MdHistory } from "react-icons/md";
 import SignInPopup from "./SignInPopup";
 import RegisterPopup from "./RegisterPopup";
 import Navigation from "./Navigation";
@@ -156,9 +156,12 @@ const Header = () => {
         </div>
         {isAuth && user?.user_role === "Користувач" && (
           <div id="icons-div">
+            <NavLink to="/order-history" className="header__order-history">
+              <MdHistory size={37} />
+            </NavLink>
             <NavLink to="/cart" className="header__in-bag" id="bag">
               <MdOutlineShoppingBag size={37} />
-              <span className="header__in-bag-number">{cartItemCount}</span>
+              {/* <span className="header__in-bag-number">{cartItemCount}</span> */}
             </NavLink>
           </div>
         )}

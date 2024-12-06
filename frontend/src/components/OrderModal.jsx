@@ -27,6 +27,7 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
       bike_id: item.bike_id,
       quantity: item.quantity,
       selected: true,
+      bike_cart_id: item.bike_cart_id,
     })),
   );
   const { user } = useAuth();
@@ -66,7 +67,11 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
   const submitOrder = async () => {
     const validItems = selectedItems
       .filter((item) => item.selected)
-      .map(({ bike_id, quantity }) => ({ bike_id, quantity }));
+      .map(({ bike_id, quantity, bike_cart_id }) => ({
+        bike_id,
+        quantity,
+        bike_cart_id,
+      }));
 
     if (validItems.length === 0) {
       alert("Виберіть принаймні один товар");
@@ -81,7 +86,6 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
         selectedCartItems: validItems,
       });
 
-      // Download receipt
       if (response.data.receiptFilename) {
         const downloadReceipt = await axios({
           url: `http://localhost:3000/download-receipt/${response.data.receiptFilename}`,
@@ -100,7 +104,6 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
         link.remove();
       }
 
-      // Existing order logic
       updateCartAfterOrder(validItems);
       updateCartItemCount(-validItems.length);
       onClose();

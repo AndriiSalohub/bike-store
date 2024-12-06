@@ -1,450 +1,520 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useState } from "react";
+import { useTypes, useBrands } from "../store";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useBrands, useTypes } from "../store";
+import axios from "axios";
 
-const fieldLabels = {
-  bike_id: "ID велосипеда",
-  bike_model: "Модель велосипеда",
-  brand_id: "Назва бренду",
-  type_id: "Назва типу",
-  bike_price: "Ціна велосипеда",
-  wheel_size: "Розмір колеса",
-  frame_material: "Матеріал рами",
-  gear_count: "Кількість передач",
-  bike_color: "Колір велосипеда",
-  bike_availability: "Наявність велосипеда",
-  bike_quantity: "Кількість велосипедів",
-  bike_rating: "Рейтинг велосипеда",
-  bike_description: "Опис велосипеда",
-  bike_image_url: "URL зображення велосипеда",
-  bike_weight: "Вага велосипеда",
-  gender: "Призначення за статтю",
-  max_weight_capacity: "Максимальна вантажопідйомність",
-  bike_warranty_period: "Гарантійний період",
-  bike_release_date: "Дата випуску велосипеда",
-  promotion_id: "ID знижки",
-};
-
-const BikeEditPage = () => {
+const AddBike = () => {
   const { toast } = useToast();
-  const { types, fetchTypes } = useTypes();
-  const { brands, fetchBrands } = useBrands();
-
-  const { bike_id: bikeId } = useParams();
-  const [bike, setBike] = useState({
-    bike_id: null,
+  const { types } = useTypes();
+  const { brands } = useBrands();
+  const [bikeDetails, setBikeDetails] = useState({
     bike_model: "",
-    brand_id: "",
-    type_id: "",
     bike_price: "",
+    bike_color: "",
+    bike_quantity: "",
+    bike_weight: "",
     wheel_size: "",
     frame_material: "",
     gear_count: "",
-    bike_color: "",
-    bike_availability: "",
-    bike_quantity: "",
-    bike_rating: "",
+    max_weight_capacity: "",
+    gender: "",
     bike_description: "",
     bike_image_url: "",
-    bike_weight: "",
-    gender: "",
-    max_weight_capacity: "",
+    type_id: "",
+    brand_id: "",
+    promotion_id: null,
+    bike_availability: "",
+    bike_rating: "",
     bike_warranty_period: "",
     bike_release_date: "",
-    promotion_id: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const fetchBikeData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/bikes/${bikeId}`,
-        );
-        const data = response.data[0];
-
-        let formattedDate = "";
-        if (data.bike_release_date) {
-          const date = new Date(data.bike_release_date);
-          date.setDate(date.getDate() + 1);
-          formattedDate = date.toISOString().split("T")[0];
-        }
-
-        setBike({
-          ...data,
-          bike_release_date: formattedDate,
-        });
-      } catch (error) {
-        console.error("Помилка отримання даних про велосипед:", error);
-      }
-    };
-
-    fetchBikeData();
-  }, [bikeId]);
-
-  useEffect(() => {
-    fetchTypes();
-    fetchBrands();
-  }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    setBike((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+  const handleChange = (e) => {
+    setBikeDetails({ ...bikeDetails, [e.target.name]: e.target.value });
   };
 
   const validate = () => {
     const newErrors = {};
 
-    if (!bike.bike_model) {
-      newErrors.bike_model = "Модель велосипеда обов'язкова.";
-    } else if (bike.bike_model.length < 2 || bike.bike_model.length > 100) {
-      newErrors.bike_model = "Назва моделі має бути від 2 до 100 символів.";
-    }
+    if (!bikeDetails.bike_model)
+      newErrors.bike_model = "Модель велосипеда є обов'язковою!";
 
-    const price = parseFloat(bike.bike_price);
-    if (!bike.bike_price) {
-      newErrors.bike_price = "Ціна обов'язкова.";
-    } else if (isNaN(price) || price < 100 || price > 100000) {
-      newErrors.bike_price = "Ціна має бути від 100 до 100,000 грн.";
-    }
-
-    const quantity = parseInt(bike.bike_quantity);
-    if (!bike.bike_quantity) {
-      newErrors.bike_quantity = "Кількість обов'язкова.";
-    } else if (isNaN(quantity) || quantity < 0 || quantity > 1000) {
-      newErrors.bike_quantity = "Кількість має бути від 0 до 1000.";
-    }
-
-    const weight = parseFloat(bike.bike_weight);
-    if (!bike.bike_weight) {
-      newErrors.bike_weight = "Вага велосипеда обов'язкова.";
-    } else if (isNaN(weight) || weight < 5 || weight > 50) {
-      newErrors.bike_weight = "Вага має бути від 5 до 50 кг.";
-    }
-
-    const wheelSize = parseFloat(bike.wheel_size);
-    if (!bike.wheel_size) {
-      newErrors.wheel_size = "Розмір колеса обов'язковий.";
-    } else if (isNaN(wheelSize) || wheelSize < 16 || wheelSize > 29) {
-      newErrors.wheel_size = "Розмір колеса має бути від 16 до 29 дюймів.";
-    }
-
-    if (!bike.frame_material) {
-      newErrors.frame_material = "Матеріал рами обов'язковий.";
-    } else if (
-      bike.frame_material.length < 2 ||
-      bike.frame_material.length > 50
+    if (
+      !bikeDetails.bike_price ||
+      isNaN(bikeDetails.bike_price) ||
+      bikeDetails.bike_price <= 1000 ||
+      bikeDetails.bike_price > 1000000
     ) {
-      newErrors.frame_material =
-        "Назва матеріалу має бути від 2 до 50 символів.";
+      newErrors.bike_price =
+        "Ціна повинна бути числом, більше тисячі і менше мільйона!";
     }
 
-    if (!bike.bike_color) {
-      newErrors.bike_color = "Колір велосипеда обов'язковий.";
-    } else if (bike.bike_color.length < 2 || bike.bike_color.length > 30) {
-      newErrors.bike_color = "Назва кольору має бути від 2 до 30 символів.";
-    }
-
-    if (!bike.type_id) {
-      newErrors.type_id = "Тип велосипеда обов'язковий.";
-    }
-
-    if (!bike.brand_id) {
-      newErrors.brand_id = "Бренд велосипеда обов'язковий.";
-    }
-
-    if (bike.bike_availability === "" || bike.bike_availability === null) {
-      newErrors.bike_availability = "Виберіть доступність велосипеда.";
-    }
-
-    if (!bike.bike_description) {
-      newErrors.bike_description = "Опис велосипеда обов'язковий.";
-    } else if (
-      bike.bike_description.length < 10 ||
-      bike.bike_description.length > 500
+    if (
+      !bikeDetails.bike_quantity ||
+      isNaN(bikeDetails.bike_quantity) ||
+      bikeDetails.bike_quantity <= 0 ||
+      bikeDetails.bike_quantity > 3000
     ) {
-      newErrors.bike_description = "Опис має бути від 10 до 500 символів.";
+      newErrors.bike_quantity =
+        "Кількість повинна бути числом, більше нуля і менше трьох тисяч!";
     }
 
-    const maxWeightCapacity = parseFloat(bike.max_weight_capacity);
-    if (!bike.max_weight_capacity) {
-      newErrors.max_weight_capacity = "Максимальна вага обов'язкова.";
-    } else if (
-      isNaN(maxWeightCapacity) ||
-      maxWeightCapacity < 50 ||
-      maxWeightCapacity > 200
+    if (
+      !bikeDetails.bike_weight ||
+      isNaN(bikeDetails.bike_weight) ||
+      bikeDetails.bike_weight <= 5 ||
+      bikeDetails.bike_weight > 40
+    ) {
+      newErrors.bike_weight =
+        "Вага повинна бути числом і більше п'яти кг, але не більше 40 кг!";
+    }
+
+    if (
+      !bikeDetails.bike_rating ||
+      isNaN(bikeDetails.bike_rating) ||
+      bikeDetails.bike_rating < 0 ||
+      bikeDetails.bike_rating > 5
+    ) {
+      newErrors.bike_rating = "Рейтинг повинен бути числом від 0 до 5!";
+    }
+
+    console.log(bikeDetails.bike_availability);
+    if (
+      bikeDetails.bike_availability != 1 ||
+      bikeDetails.bike_availability == 0
+    )
+      newErrors.bike_availability = "Оберіть наявність велосипеда!";
+
+    if (
+      !bikeDetails.max_weight_capacity ||
+      isNaN(bikeDetails.max_weight_capacity) ||
+      bikeDetails.max_weight_capacity <= 10 ||
+      bikeDetails.max_weight_capacity > 250
     ) {
       newErrors.max_weight_capacity =
-        "Максимальна вага має бути від 50 до 200 кг.";
+        "Максимальна вантажопідйомність повинна бути числом і більше 10 кг, але не більше 250 кг!";
     }
 
-    if (!bike.gender) {
-      newErrors.gender = "Статева приналежність обов'язкова.";
+    if (
+      !bikeDetails.bike_warranty_period ||
+      isNaN(bikeDetails.bike_warranty_period) ||
+      bikeDetails.bike_warranty_period <= 0 ||
+      bikeDetails.bike_warranty_period > 60
+    ) {
+      newErrors.bike_warranty_period =
+        "Гарантійний період повинен бути числом і більше нуля, але не більше 60 місяців!";
     }
 
-    const gearCount = parseInt(bike.gear_count);
-    if (!bike.gear_count) {
-      newErrors.gear_count = "Кількість передач обов'язкова.";
-    } else if (isNaN(gearCount) || gearCount < 1 || gearCount > 27) {
-      newErrors.gear_count = "Кількість передач має бути від 1 до 27.";
-    }
-
-    const bikeRating = parseFloat(bike.bike_rating);
-    if (bike.bike_rating) {
-      if (isNaN(bikeRating) || bikeRating < 0 || bikeRating > 5) {
-        newErrors.bike_rating = "Рейтинг повинен бути від 0 до 5.";
-      }
-    }
-
-    const warrantyPeriod = parseInt(bike.bike_warranty_period);
-    if (bike.bike_warranty_period) {
-      if (isNaN(warrantyPeriod) || warrantyPeriod < 0 || warrantyPeriod > 60) {
-        newErrors.bike_warranty_period =
-          "Гарантійний період має бути від 0 до 60 місяців.";
-      }
-    }
-
-    if (!bike.bike_release_date) {
-      newErrors.bike_release_date = "Дата випуску обов'язкова.";
+    if (!bikeDetails.bike_release_date) {
+      newErrors.bike_release_date = "Дата випуску є обов'язковою!";
     } else {
-      const releaseDate = new Date(bike.bike_release_date);
+      const releaseDate = new Date(bikeDetails.bike_release_date);
+      const minDate = new Date("2020-01-01");
       const currentDate = new Date();
-      const maxDate = new Date();
-      maxDate.setFullYear(currentDate.getFullYear() + 1);
-
-      if (releaseDate > maxDate || releaseDate < new Date("2000-01-01")) {
+      if (releaseDate < minDate || releaseDate > currentDate) {
         newErrors.bike_release_date =
-          "Дата випуску має бути від 01.01.2000 до наступного року.";
+          "Дата випуску повинна бути не раніше 2020 року та не пізніше поточної дати!";
       }
     }
 
-    if (bike.bike_image_url) {
-      const urlPattern =
-        /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-      if (!urlPattern.test(bike.bike_image_url)) {
-        newErrors.bike_image_url = "Некоректне посилання на зображення.";
-      }
+    if (
+      !bikeDetails.bike_image_url ||
+      !/^(ftp|http|https):\/\/[^ "]+$/.test(bikeDetails.bike_image_url)
+    ) {
+      newErrors.bike_image_url = "Вкажіть правильне посилання на зображення!";
     }
+
+    if (!bikeDetails.gender)
+      newErrors.gender = "Оберіть статеву приналежність велосипеда!";
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveChanges = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    if (!validate()) {
-      setIsSubmitting(false);
-      return;
-    }
+    if (!validate()) return;
 
     try {
-      await axios.put(`http://localhost:3000/bikes/${bikeId}`, {
-        ...bike,
-        bike_release_date: bike.bike_release_date.slice(0, 10),
-      });
-
+      const formattedDate = new Date(bikeDetails.bike_release_date)
+        .toISOString()
+        .split("T")[0];
+      const dataToSubmit = {
+        ...bikeDetails,
+        bike_release_date: formattedDate,
+      };
+      await axios.post("http://localhost:3000/bikes", dataToSubmit);
       toast({
-        title: "Результат:",
-        description: `Дані про велосипед ${bike.bike_model} успішно змінено!`,
+        title: "Успішно додано",
+        description: `Велосипед ${bikeDetails.bike_model} успішно додано!`,
+      });
+      setBikeDetails({
+        bike_model: "",
+        bike_price: "",
+        bike_color: "",
+        bike_quantity: "",
+        bike_weight: "",
+        wheel_size: "",
+        frame_material: "",
+        gear_count: "",
+        max_weight_capacity: "",
+        gender: "",
+        bike_description: "",
+        bike_image_url: "",
+        type_id: "",
+        brand_id: "",
+        promotion_id: null,
+        bike_availability: "",
+        bike_rating: "",
+        bike_warranty_period: "",
+        bike_release_date: "",
       });
     } catch (error) {
-      console.error("Помилка зміни велосипеду:", error);
       toast({
-        title: "Результат:",
-        description: `Помилка при зміненні даних про велосипед ${bike.bike_model}`,
+        title: "Помилка додавання",
+        description: "Не вдалося додати велосипед",
       });
-    } finally {
-      setIsSubmitting(false);
+      console.error("Не вдалося додати велосипед:", error);
     }
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <section className="overflow-x-auto p-4 max-w-3xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Редагування велосипеду: {bike.bike_model}</CardTitle>
+          <h2 className="text-2xl font-semibold">Додати новий велосипед</h2>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {Object.entries(bike).map(([key, value]) => (
-              <div key={key}>
-                <Label htmlFor={key}>
-                  {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
-                </Label>
-                {key === "bike_availability" || key === "gender" ? (
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <Input
+                  name="bike_model"
+                  placeholder="Модель велосипеда"
+                  value={bikeDetails.bike_model}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.bike_model && (
+                  <div className="text-red-600 text-sm">
+                    {errors.bike_model}
+                  </div>
+                )}
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  <Input
+                    name="bike_price"
+                    type="number"
+                    placeholder="Ціна"
+                    value={bikeDetails.bike_price}
+                    onChange={handleChange}
+                    required
+                  />
+                  {errors.bike_price && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_price}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    name="bike_quantity"
+                    type="number"
+                    placeholder="Кількість"
+                    value={bikeDetails.bike_quantity}
+                    onChange={handleChange}
+                    required
+                  />
+                  {errors.bike_quantity && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_quantity}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  <Input
+                    name="bike_weight"
+                    type="number"
+                    placeholder="Вага велосипеда (кг)"
+                    value={bikeDetails.bike_weight}
+                    onChange={handleChange}
+                    required
+                  />
+                  {errors.bike_weight && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_weight}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    name="wheel_size"
+                    type="number"
+                    placeholder="Розмір колеса (дюйми)"
+                    value={bikeDetails.wheel_size}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Input
+                  name="frame_material"
+                  placeholder="Матеріал рами"
+                  value={bikeDetails.frame_material}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <Input
+                  name="bike_color"
+                  placeholder="Колір велосипеда"
+                  value={bikeDetails.bike_color}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1">
                   <Select
                     value={
-                      key === "bike_availability"
-                        ? value === 1
-                          ? "Доступний"
-                          : value === 0
-                            ? "Недоступний"
-                            : ""
-                        : value
+                      types.find((type) => type.type_id === bikeDetails.type_id)
+                        ?.type_name || ""
                     }
-                    onValueChange={(val) =>
-                      setBike((prev) => ({
+                    onValueChange={(val) => {
+                      const selectedType = types.find(
+                        (type) => type.type_name === val,
+                      );
+                      setBikeDetails((prev) => ({
                         ...prev,
-                        [key]:
-                          key === "bike_availability"
-                            ? val === "Доступний"
-                              ? 1
-                              : 0
-                            : val,
-                      }))
-                    }
+                        type_id: selectedType?.type_id || "",
+                      }));
+                    }}
                   >
                     <SelectTrigger>
-                      {value === 1
-                        ? "Доступний"
-                        : value === 0
-                          ? "Недоступний"
-                          : value || "Виберіть опцію"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {key === "bike_availability" ? (
-                        <>
-                          <SelectItem value="Доступний">Доступний</SelectItem>
-                          <SelectItem value="Недоступний">
-                            Недоступний
-                          </SelectItem>
-                        </>
-                      ) : (
-                        <>
-                          <SelectItem value="чоловічий">Чоловічий</SelectItem>
-                          <SelectItem value="жіночий">Жіночий</SelectItem>
-                          <SelectItem value="унісекс">Унісекс</SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                ) : key === "bike_id" ? (
-                  <Input id={key} name={key} value={value} disabled />
-                ) : key === "bike_description" ? (
-                  <Textarea
-                    id={key}
-                    name={key}
-                    value={value || ""}
-                    onChange={handleInputChange}
-                  />
-                ) : key === "bike_release_date" ? (
-                  <Input
-                    id={key}
-                    name={key}
-                    type="date"
-                    value={value || ""}
-                    onChange={handleInputChange}
-                  />
-                ) : key === "type_id" ? (
-                  <Select
-                    value={value}
-                    onValueChange={(val) =>
-                      setBike((prev) => ({ ...prev, type_id: val }))
-                    }
-                  >
-                    <SelectTrigger>
-                      {types.find((type) => type.type_id === value)
-                        ?.type_name || "Виберіть тип"}
+                      {types.find((type) => type.type_id == bikeDetails.type_id)
+                        ?.type_name || "Оберіть тип"}
                     </SelectTrigger>
                     <SelectContent>
                       {types.map((type) => (
-                        <SelectItem
-                          key={type.type_id}
-                          value={type.type_id.toString()}
-                        >
+                        <SelectItem key={type.type_id} value={type.type_name}>
                           {type.type_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                ) : key === "brand_id" ? (
+                </div>
+                <div className="flex-1">
                   <Select
-                    value={value}
-                    onValueChange={(val) =>
-                      setBike((prev) => ({ ...prev, brand_id: val }))
+                    value={
+                      brands.find(
+                        (brand) => brand.brand_id === bikeDetails.brand_id,
+                      )?.brand_name || ""
                     }
+                    onValueChange={(val) => {
+                      const selectedBrand = brands.find(
+                        (brand) => brand.brand_name === val,
+                      );
+                      setBikeDetails((prev) => ({
+                        ...prev,
+                        brand_id: selectedBrand?.brand_id || "",
+                      }));
+                    }}
                   >
                     <SelectTrigger>
-                      {brands.find((brand) => brand.brand_id === value)
-                        ?.brand_name || "Виберіть бренд"}
+                      {brands.find(
+                        (brand) => brand.brand_id == bikeDetails.brand_id,
+                      )?.brand_name || "Оберіть бренд"}
                     </SelectTrigger>
                     <SelectContent>
                       {brands.map((brand) => (
                         <SelectItem
                           key={brand.brand_id}
-                          value={brand.brand_id.toString()}
+                          value={brand.brand_name}
                         >
                           {brand.brand_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                ) : (
-                  <Input
-                    id={key}
-                    name={key}
-                    value={value || ""}
-                    onChange={handleInputChange}
-                    type={
-                      [
-                        "bike_price",
-                        "bike_weight",
-                        "wheel_size",
-                        "bike_quantity",
-                        "gear_count",
-                        "bike_rating",
-                        "max_weight_capacity",
-                        "bike_warranty_period",
-                      ].includes(key)
-                        ? "number"
-                        : "text"
+                </div>
+                <div className="flex-1">
+                  <Select
+                    value={
+                      bikeDetails.bike_availability === 1
+                        ? "Доступний"
+                        : bikeDetails.bike_availability === 0
+                          ? "Недоступний"
+                          : ""
                     }
+                    onValueChange={(val) => {
+                      setBikeDetails((prev) => ({
+                        ...prev,
+                        bike_availability: val === "Доступний" ? 1 : 0,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      {bikeDetails.bike_availability === 1
+                        ? "Доступний"
+                        : bikeDetails.bike_availability === 0
+                          ? "Недоступний"
+                          : "Виберіть наявність"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Доступний">Доступний</SelectItem>
+                      <SelectItem value="Недоступний">Недоступний</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.bike_availability && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_availability}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <Textarea
+                  name="bike_description"
+                  placeholder="Опис велосипеда"
+                  value={bikeDetails.bike_description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  <Input
+                    name="max_weight_capacity"
+                    type="number"
+                    placeholder="Макс. вага (кг)"
+                    value={bikeDetails.max_weight_capacity}
+                    onChange={handleChange}
+                    required
                   />
-                )}
-                {errors[key] && (
-                  <p className="text-red-500 text-xs mt-1">{errors[key]}</p>
+                  {errors.max_weight_capacity && (
+                    <div className="text-red-600 text-sm">
+                      {errors.max_weight_capacity}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Select
+                    value={bikeDetails.gender || ""}
+                    onValueChange={(val) => {
+                      setBikeDetails((prev) => ({
+                        ...prev,
+                        gender: val,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      {bikeDetails.gender || "Оберіть статеву приналежність"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="чоловічий">Чоловічий</SelectItem>
+                      <SelectItem value="жіночий">Жіночий</SelectItem>
+                      <SelectItem value="унісекс">Унісекс</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.gender && (
+                    <div className="text-red-600 text-sm">{errors.gender}</div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    name="gear_count"
+                    type="number"
+                    placeholder="Кількість передач"
+                    value={bikeDetails.gear_count}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1">
+                  <Input
+                    name="bike_rating"
+                    type="number"
+                    placeholder="Рейтинг велосипеда"
+                    value={bikeDetails.bike_rating}
+                    onChange={handleChange}
+                    min={0}
+                    max={5}
+                  />
+                  {errors.bike_rating && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_rating}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    name="bike_warranty_period"
+                    type="number"
+                    placeholder="Гарантійний період (місяці)"
+                    value={bikeDetails.bike_warranty_period}
+                    onChange={handleChange}
+                  />
+                  {errors.bike_warranty_period && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_warranty_period}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input
+                    name="bike_release_date"
+                    type="date"
+                    placeholder="Дата випуску"
+                    value={bikeDetails.bike_release_date}
+                    onChange={handleChange}
+                  />
+                  {errors.bike_release_date && (
+                    <div className="text-red-600 text-sm">
+                      {errors.bike_release_date}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <Input
+                  name="bike_image_url"
+                  placeholder="Посилання на зображення"
+                  value={bikeDetails.bike_image_url}
+                  onChange={handleChange}
+                />
+                {errors.bike_image_url && (
+                  <div className="text-red-600 text-sm">
+                    {errors.bike_image_url}
+                  </div>
                 )}
               </div>
-            ))}
-          </div>
+              <Button type="submit">Додати велосипед</Button>
+            </div>
+          </form>
         </CardContent>
-        <CardFooter>
-          <Button
-            onClick={handleSaveChanges}
-            disabled={isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? "Збереження..." : "Зберегти зміни"}
-          </Button>
-        </CardFooter>
       </Card>
-    </div>
+    </section>
   );
 };
 
-export default BikeEditPage;
+export default AddBike;

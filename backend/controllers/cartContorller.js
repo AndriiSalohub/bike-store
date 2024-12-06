@@ -112,7 +112,7 @@ const getCartItems = (req, res) => {
 };
 
 const updateCartItem = (req, res) => {
-  const { bikeId, quantity, email } = req.body;
+  const { bikeId, quantity, email, bikeCartId } = req.body;
 
   getCurrentCart(email, (cartErr, cartData) => {
     if (cartErr || !cartData || cartData.length === 0) {
@@ -124,7 +124,7 @@ const updateCartItem = (req, res) => {
 
     const cartId = cartData[0].cart_id;
 
-    updateCartItemQuantity(bikeId, cartId, quantity, (err) => {
+    updateCartItemQuantity(bikeId, cartId, quantity, bikeCartId, (err) => {
       if (err) {
         console.error("Error updating cart item:", err);
         return res.status(500).json({

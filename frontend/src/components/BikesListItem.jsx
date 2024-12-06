@@ -77,7 +77,7 @@ const BikesListItem = ({
         }}
         layout
       >
-        <NavLink to={`/bikes/${bike_model.split(" ").join("") + bike_color}`}>
+        <NavLink to={`/bikes/${bike_id}`}>
           <CardHeader>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}

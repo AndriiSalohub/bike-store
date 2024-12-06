@@ -7,6 +7,7 @@ const path = require("path");
 
 const processOrder = (req, res) => {
   const { email, paymentMethod, deliveryPrice, selectedCartItems } = req.body;
+
   if (
     !email ||
     !paymentMethod ||

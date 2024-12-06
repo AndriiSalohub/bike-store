@@ -59,7 +59,7 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
   doc.moveDown(1);
 
   const getItemDetailsQuery = `
-    SELECT b.bike_id, b.bike_model, b.bike_price 
+    SELECT b.bike_id, b.bike_model, b.bike_price
     FROM bike_store.bike b 
     WHERE b.bike_id IN (?)
   `;
@@ -143,19 +143,16 @@ const createOrder = (orderData, selectedCartItems, callback) => {
   queryDatabase("START TRANSACTION", [], (startErr) => {
     if (startErr) return callback(startErr);
 
-    const getCurrentCartQuery =
-      "SELECT cart_id FROM bike_store.cart WHERE user_email = ? ORDER BY cart_created_at DESC LIMIT 1";
+    const getCurrentCart =
+      "SELECT cart_id FROM bike_store.cart WHERE user_email = ? ORDER BY cart_created_at";
 
-    queryDatabase(getCurrentCartQuery, [email], (cartErr, cartResult) => {
+    queryDatabase(getCurrentCart, [email], (cartErr, cartResult) => {
       if (cartErr) {
         queryDatabase("ROLLBACK", [], () => callback(cartErr));
         return;
       }
 
       const cartId = cartResult[0].cart_id;
-
-      const calculateSelectedItemsPriceQuery =
-        "SELECT b.bike_id, b.bike_price * ? AS item_total_price, ? AS item_quantity, b.bike_price AS unit_price FROM bike_store.bike b WHERE b.bike_id = ?";
 
       const calculateTotalPrice = (items, done) => {
         let totalBikePrice = 0;
@@ -173,8 +170,8 @@ const createOrder = (orderData, selectedCartItems, callback) => {
 
           const item = items[index];
           queryDatabase(
-            calculateSelectedItemsPriceQuery,
-            [item.quantity, item.quantity, item.bike_id],
+            "SELECT bike_price * ? AS item_total_price FROM bike_store.bike WHERE bike_id = ?",
+            [item.quantity, item.bike_id],
             (priceErr, priceResult) => {
               if (priceErr) {
                 done(priceErr);
@@ -199,6 +196,7 @@ const createOrder = (orderData, selectedCartItems, callback) => {
           return;
         }
 
+        // Insert order
         const insertOrderQuery =
           "INSERT INTO bike_store.order (order_date, payment_method, order_status, delivery_price, total_price, user_email) VALUES (NOW(), ?, 'Очікується', ?, ?, ?)";
 
@@ -213,102 +211,112 @@ const createOrder = (orderData, selectedCartItems, callback) => {
 
             const orderId = orderResult.insertId;
 
-            const bikeIdPlaceholders = selectedCartItems
-              .map(() => "?")
-              .join(", ");
+            // Process each selected cart item
+            const processCartItems = (index) => {
+              if (index >= selectedCartItems.length) {
+                // All items processed, commit transaction
+                queryDatabase("COMMIT", [], (commitErr) => {
+                  if (commitErr) return callback(commitErr);
 
-            const insertOrderItemsQuery = `INSERT INTO bike_store.bike_cart_order (order_id, bike_cart_id)
-               SELECT ?, bc.bike_cart_id
-               FROM bike_store.bike_cart bc
-               WHERE bc.cart_id = ? AND bc.bike_id IN (${bikeIdPlaceholders})`;
+                  // Generate receipt (your existing logic)
+                  generatePDFReceipt(
+                    {
+                      orderId,
+                      paymentMethod,
+                      deliveryPrice,
+                      totalPrice: priceCalc.totalPrice,
+                      email,
+                    },
+                    selectedCartItems,
+                    (pdfErr, receiptFilename) => {
+                      if (pdfErr) {
+                        console.error("PDF generation error:", pdfErr);
+                      }
 
-            const params = [orderId, cartId].concat(
-              selectedCartItems.map((item) => item.bike_id),
-            );
-
-            queryDatabase(insertOrderItemsQuery, params, (itemsErr) => {
-              if (itemsErr) {
-                queryDatabase("ROLLBACK", [], () => callback(itemsErr));
+                      callback(null, {
+                        orderId,
+                        totalPrice: priceCalc.totalPrice,
+                        bikeTotalPrice: priceCalc.totalBikePrice,
+                        deliveryPrice,
+                        uniqueBikeCount: priceCalc.uniqueBikeCount,
+                        receiptFilename,
+                      });
+                    },
+                  );
+                });
                 return;
               }
 
-              // Update bike_cart quantities
-              const updateCartItemQuery =
-                "UPDATE bike_store.bike_cart SET quantity = quantity - ? WHERE cart_id = ? AND bike_id = ?";
+              const item = selectedCartItems[index];
 
-              const updateQuantities = (index) => {
-                if (index >= selectedCartItems.length) {
-                  queryDatabase("COMMIT", [], (commitErr) => {
-                    if (commitErr) return callback(commitErr);
+              const insertBikeCartOrderQuery = `
+                INSERT INTO bike_store.bike_cart_order 
+                (order_id, bike_cart_id, quantity) 
+                SELECT ?, bike_cart_id, ? 
+                FROM bike_store.bike_cart 
+                WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний'
+              `;
 
-                    // Generate PDF Receipt
-                    generatePDFReceipt(
-                      {
-                        orderId,
-                        paymentMethod,
-                        deliveryPrice,
-                        totalPrice: priceCalc.totalPrice,
-                        email,
-                      },
-                      selectedCartItems,
-                      (pdfErr, receiptFilename) => {
-                        if (pdfErr) {
-                          console.error("PDF generation error:", pdfErr);
-                          callback(null, {
-                            orderId,
-                            totalPrice: priceCalc.totalPrice,
-                            bikeTotalPrice: priceCalc.totalBikePrice,
-                            deliveryPrice,
-                            uniqueBikeCount: priceCalc.uniqueBikeCount,
-                          });
-                        } else {
-                          callback(null, {
-                            orderId,
-                            totalPrice: priceCalc.totalPrice,
-                            bikeTotalPrice: priceCalc.totalBikePrice,
-                            deliveryPrice,
-                            uniqueBikeCount: priceCalc.uniqueBikeCount,
-                            receiptFilename,
-                          });
-                        }
-                      },
+              queryDatabase(
+                insertBikeCartOrderQuery,
+                [orderId, item.quantity, cartId, item.bike_id],
+                (bikeCartOrderErr) => {
+                  if (bikeCartOrderErr) {
+                    queryDatabase("ROLLBACK", [], () =>
+                      callback(bikeCartOrderErr),
                     );
-                  });
-                  return;
-                }
+                    return;
+                  }
 
-                const item = selectedCartItems[index];
-                queryDatabase(
-                  updateCartItemQuery,
-                  [item.quantity, cartId, item.bike_id],
-                  (updateErr) => {
-                    if (updateErr) {
-                      queryDatabase("ROLLBACK", [], () => callback(updateErr));
-                      return;
-                    }
+                  const updateBikeCartQuery1 = `
+                  UPDATE bike_store.bike_cart 
+                  SET 
+                    quantity = quantity - ? 
+                  WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
+                  `;
 
-                    const deleteCartItemQuery =
-                      "DELETE FROM bike_store.bike_cart WHERE cart_id = ? AND bike_id = ? AND quantity = 0";
+                  queryDatabase(
+                    updateBikeCartQuery1,
+                    [item.quantity, cartId, item.bike_id, item.bike_cart_id],
+                    (updateErr1) => {
+                      if (updateErr1) {
+                        queryDatabase("ROLLBACK", [], () =>
+                          callback(updateErr1),
+                        );
+                        return;
+                      }
 
-                    queryDatabase(
-                      deleteCartItemQuery,
-                      [cartId, item.bike_id],
-                      (deleteErr) => {
-                        if (deleteErr) {
-                          queryDatabase("ROLLBACK", [], () =>
-                            callback(deleteErr),
-                          );
-                          return;
-                        }
+                      const updateBikeCartQuery2 = `
+                      UPDATE bike_store.bike_cart 
+                      SET 
+                        bike_cart_status = CASE 
+                        WHEN quantity > 0 THEN 'Активний' 
+                      ELSE 'Архівований' 
+                      END
+                      WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
+                      `;
 
-                        updateQuantities(index + 1);
-                      },
-                    );
-                  },
-                );
-              };
-              updateQuantities(0);
-            });
+                      queryDatabase(
+                        updateBikeCartQuery2,
+                        [cartId, item.bike_id, item.bike_cart_id],
+                        (updateErr2) => {
+                          if (updateErr2) {
+                            queryDatabase("ROLLBACK", [], () =>
+                              callback(updateErr2),
+                            );
+                            return;
+                          }
+
+                          processCartItems(index + 1);
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            };
+
+            processCartItems(0);
           },
         );
       });

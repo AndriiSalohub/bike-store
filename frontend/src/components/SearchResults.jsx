@@ -26,9 +26,7 @@ const SearchResults = ({ results, role }) => {
           <NavLink
             key={bike_id}
             to={
-              role === "Адмін"
-                ? `/edit/bikes/${bike_id}`
-                : `/bikes/${bike_model.split(" ").join("") + bike_color}`
+              role === "Адмін" ? `/edit/bikes/${bike_id}` : `/bikes/${bike_id}`
             }
             className="search-result"
           >

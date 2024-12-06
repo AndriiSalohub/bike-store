@@ -51,12 +51,13 @@ const CartPage = () => {
     }
   }, [user]);
 
-  const updateQuantity = async (bikeId, newQuantity) => {
+  const updateQuantity = async (bikeId, newQuantity, bikeCartId) => {
     try {
       await axios.post("http://localhost:3000/update-cart-item", {
         bikeId,
         quantity: newQuantity,
         email: user?.user_email,
+        bikeCartId: bikeCartId,
       });
 
       const updatedItems = cartItems.map((item) =>
@@ -164,7 +165,6 @@ const CartPage = () => {
     setCartItems(updatedItems);
     setTotalPrice(newTotalPrice);
     setCartQuantity(newCartQuantity);
-    updateCartItemCount(-orderedItems.length);
   };
 
   return (
@@ -210,6 +210,7 @@ const CartPage = () => {
                       updateQuantity(
                         item.bike_id,
                         Math.max(1, item.quantity - 1),
+                        item.bike_cart_id,
                       )
                     }
                     className="p-1 bg-gray-100 rounded-full hover:bg-gray-200"
@@ -221,7 +222,11 @@ const CartPage = () => {
                   </span>
                   <button
                     onClick={() =>
-                      updateQuantity(item.bike_id, item.quantity + 1)
+                      updateQuantity(
+                        item.bike_id,
+                        item.quantity + 1,
+                        item.bike_cart_id,
+                      )
                     }
                     className={`p-1 bg-gray-100 rounded-full hover:bg-gray-200 ${
                       item.quantity >= item.bike_quantity

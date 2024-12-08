@@ -2,9 +2,11 @@ const {
   getAllBikes,
   getBikeById,
   updateBike,
-  deleteBike,
+  softDeleteBike,
   getTopBikes,
   addBike,
+  getDeletedBikes,
+  restoreBike,
 } = require("../models/bikeModel");
 
 const getBikes = (req, res) => {
@@ -40,10 +42,10 @@ const putBike = (req, res) => {
   });
 };
 
-const deleteBikeRecord = (req, res) => {
+const softDeleteBikeRecord = (req, res) => {
   const bikeId = req.params.bike_id;
 
-  deleteBike(bikeId, (err, data) => {
+  softDeleteBike(bikeId, (err, data) => {
     if (err) return res.status(500).send(err);
     return res.send(data);
   });
@@ -71,11 +73,36 @@ const postBike = (req, res) => {
   });
 };
 
+const getDeletedBikesRecord = (req, res) => {
+  getDeletedBikes((err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .send("Помилка при отриманні списку видалених велосипедів.");
+    }
+
+    return res.send(data);
+  });
+};
+
+const restoreBikeRecord = (req, res) => {
+  const bikeId = req.params.bike_id;
+
+  restoreBike(bikeId, (err, data) => {
+    if (err) return res.status(500).send(err);
+    return res
+      .status(200)
+      .send({ message: "Велосипеди відновлені успішно", bikeId });
+  });
+};
+
 module.exports = {
   getBikes,
   getBike,
   putBike,
-  deleteBikeRecord,
+  softDeleteBikeRecord,
   getBikesWithHighestRating,
   postBike,
+  getDeletedBikesRecord,
+  restoreBikeRecord,
 };

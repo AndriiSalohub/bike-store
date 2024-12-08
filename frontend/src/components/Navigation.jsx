@@ -19,6 +19,8 @@ const Navigation = ({ role }) => {
         return "Управління даними";
       case "/reports":
         return "Звіти";
+      case "/deleted":
+        return "Видалені";
       default:
         return "Адмін Меню";
     }
@@ -39,6 +41,9 @@ const Navigation = ({ role }) => {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink to="/reports">Звіти</NavLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink to="/deleted">Видалені</NavLink>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

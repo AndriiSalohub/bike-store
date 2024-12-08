@@ -14,6 +14,7 @@ import AddPage from "./pages/AddPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import OrderHistoryPage from "./pages/OrderHistoryPage.jsx";
 import BikeDetails from "./pages/BikeDetails.jsx";
+import DeletedPage from "./pages/DeletedPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: "/order-history",
         element: <OrderHistoryPage />,
+      },
+      {
+        path: "/deleted",
+        element: <DeletedPage />,
       },
     ],
   },

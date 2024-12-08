@@ -53,6 +53,7 @@ const BikesEdit = () => {
         title: "Помилка видалення",
         description: `Не вдалось видалити велосипед ${model}`,
       });
+
       console.error("Не вдалося видалити велосипед:", error);
     }
   };

@@ -2,8 +2,10 @@ const {
   getAllBrands,
   getBrandById,
   updateBrand,
-  deleteBrand,
+  softDeleteBrand,
   addBrand,
+  getDeletedBrands,
+  restoreBrand,
 } = require("../models/brandModel");
 
 const getBrands = (req, res) => {
@@ -37,13 +39,13 @@ const putBrand = (req, res) => {
   });
 };
 
-const deleteBrandRecord = (req, res) => {
+const softDeleteBrandRecord = (req, res) => {
   const brandId = req.params.brand_id;
 
-  deleteBrand(brandId, (err, data) => {
+  softDeleteBrand(brandId, (err, data) => {
     if (err) return res.status(500).send(err);
 
-    return res.status(200).send(data);
+    return res.send(data);
   });
 };
 
@@ -61,10 +63,34 @@ const postBrand = (req, res) => {
   });
 };
 
+const getDeletedBrandsRecord = (req, res) => {
+  getDeletedBrands((err, data) => {
+    if (err) {
+      return res
+        .status(500)
+        .send("Помилка при отриманні списку видалених брендів.");
+    }
+
+    return res.send(data);
+  });
+};
+
+const restoreBrandRecord = (req, res) => {
+  const brandId = req.params.brand_id;
+
+  restoreBrand(brandId, (err, data) => {
+    if (err) return res.status(500).send(err);
+
+    return res.status(200).send({ message: "Бренд успішно відновлено" });
+  });
+};
+
 module.exports = {
   getBrands,
   getBrand,
   putBrand,
-  deleteBrandRecord,
+  softDeleteBrandRecord,
   postBrand,
+  getDeletedBrandsRecord,
+  restoreBrandRecord,
 };

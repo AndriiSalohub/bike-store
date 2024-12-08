@@ -3,7 +3,7 @@ const { queryDatabase } = require("../db/db");
 const getAllBikes = (filters, sorting, callback) => {
   let query = `
     SELECT * FROM bike_store.bike 
-    WHERE bike_quantity > 0
+    WHERE bike_quantity > 0 AND bike_deleted_at IS NULL
   `;
   const queryParams = [];
 
@@ -81,8 +81,14 @@ const updateBike = (bikeId, newBike, callback) => {
   queryDatabase(query, [newBike, bikeId], callback);
 };
 
-const deleteBike = (bikeId, callback) => {
-  const query = "DELETE FROM bike_store.bike WHERE bike_id = ?";
+const softDeleteBike = (bikeId, callback) => {
+  const query = `
+    UPDATE bike_store.bike 
+    SET 
+      bike_deleted_at = CURRENT_TIMESTAMP, 
+      bike_availability = FALSE
+    WHERE bike_id = ?
+  `;
 
   queryDatabase(query, [bikeId], callback);
 };
@@ -135,12 +141,43 @@ const getDistinctGenders = (callback) => {
   queryDatabase(query, [], callback);
 };
 
+const getDeletedBikes = (callback) => {
+  const query = `
+    SELECT DISTINCT b.*, t.type_name, br.brand_name FROM bike_store.bike b 
+      INNER JOIN bike_store.type t ON b.type_id = t.type_id
+      INNER JOIN bike_store.brand br ON br.brand_id = b.brand_id
+    WHERE b.bike_deleted_at IS NOT NULL;
+  `;
+
+  queryDatabase(query, [], callback);
+};
+
+const restoreBike = (bikeId, callback) => {
+  const query = `
+    UPDATE bike_store.bike b
+    INNER JOIN bike_store.type t ON b.type_id = t.type_id
+    INNER JOIN bike_store.brand br ON b.brand_id = br.brand_id
+    SET 
+      b.bike_deleted_at = NULL, 
+      b.bike_availability = TRUE, 
+      b.bike_quantity = GREATEST(b.bike_quantity, 1)
+    WHERE 
+      b.bike_id = ? 
+      AND t.type_deleted_at IS NULL 
+      AND br.brand_deleted_at IS NULL
+  `;
+
+  queryDatabase(query, [bikeId], callback);
+};
+
 module.exports = {
   getAllBikes,
   getBikeById,
   updateBike,
-  deleteBike,
+  softDeleteBike,
   getTopBikes,
   addBike,
   getDistinctGenders,
+  getDeletedBikes,
+  restoreBike,
 };

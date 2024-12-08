@@ -1,6 +1,5 @@
 const { queryDatabase } = require("../db/db");
 
-// Get All Types Statistics
 const getAllTypesStatistic = (startDate, endDate, callback) => {
   const query = `
     SELECT 
@@ -28,7 +27,6 @@ const getAllTypesStatistic = (startDate, endDate, callback) => {
   queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
-// Get All Brands Statistics
 const getAllBrandsStatistic = (startDate, endDate, callback) => {
   const query = `
     SELECT 
@@ -56,7 +54,6 @@ const getAllBrandsStatistic = (startDate, endDate, callback) => {
   queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
-// Get Orders Statistics
 const getOrdersStatistic = (startDate, endDate, callback) => {
   const query = `
     SELECT
@@ -92,7 +89,6 @@ const getOrdersStatistic = (startDate, endDate, callback) => {
   queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
-// Get Popular Bikes Statistics
 const getPopularBikesStatistic = (callback) => {
   const query = `
     SELECT 

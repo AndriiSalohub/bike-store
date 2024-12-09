@@ -94,9 +94,26 @@ const Statistics = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {typesStats.map((stat, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className={`hover:shadow-lg transition-shadow relative ${
+                  stat.type_deleted_at ? "opacity-50" : ""
+                }`}
+              >
+                {stat.type_deleted_at && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute top-2 right-2 z-10"
+                  >
+                    Видалено
+                  </Badge>
+                )}
                 <CardContent className="pt-6">
-                  <h3 className="text-lg font-semibold text-center">
+                  <h3
+                    className={`text-lg font-semibold text-center ${
+                      stat.type_deleted_at ? "line-through" : ""
+                    }`}
+                  >
                     {stat.type_name}
                   </h3>
                   <Badge variant="secondary">
@@ -128,6 +145,7 @@ const Statistics = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Бренд</TableHead>
+                <TableHead className="text-center">Статус</TableHead>
                 <TableHead className="text-center">Кількість</TableHead>
                 <TableHead className="text-center">Продано</TableHead>
                 <TableHead className="text-right">Рейтинг</TableHead>
@@ -138,6 +156,13 @@ const Statistics = () => {
                 <TableRow key={index}>
                   <TableCell className="font-medium">
                     {stat.brand_name}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {stat.brand_deleted_at ? (
+                      <Badge variant="destructive">Видалено</Badge>
+                    ) : (
+                      <Badge>Активний</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline">{stat.total_bikes}</Badge>
@@ -211,14 +236,33 @@ const Statistics = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {bikesStats.map((bike, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className={`hover:shadow-lg transition-shadow relative ${
+                  bike.bike_deleted_at ? "opacity-50" : ""
+                }`}
+              >
+                {bike.bike_deleted_at && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute top-2 right-2 z-10"
+                  >
+                    Видалено
+                  </Badge>
+                )}
                 <CardContent className="pt-6">
                   <img
                     src={bike.bike_image_url}
                     alt={bike.bike_model}
-                    className="w-full object-cover rounded-md"
+                    className={`w-full object-cover rounded-md ${
+                      bike.bike_deleted_at ? "grayscale" : ""
+                    }`}
                   />
-                  <h3 className="text-lg font-semibold text-center mt-4">
+                  <h3
+                    className={`text-lg font-semibold text-center mt-4 ${
+                      bike.bike_deleted_at ? "line-through" : ""
+                    }`}
+                  >
                     {bike.bike_model}
                   </h3>
                   <div className="text-center mt-2 flex gap-2">

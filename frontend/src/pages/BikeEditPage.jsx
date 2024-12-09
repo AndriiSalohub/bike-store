@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useBrands, useTypes } from "../store";
+import { useBrands, usePromotions, useTypes } from "../store";
 
 const fieldLabels = {
   bike_id: "ID велосипеда",
@@ -48,6 +48,7 @@ const BikeEditPage = () => {
   const { toast } = useToast();
   const { types, fetchTypes } = useTypes();
   const { brands, fetchBrands } = useBrands();
+  const { currentPromotions, fetchCurrentPromotions } = usePromotions();
 
   const { bike_id: bikeId } = useParams();
   const [bike, setBike] = useState({
@@ -106,6 +107,7 @@ const BikeEditPage = () => {
   useEffect(() => {
     fetchTypes();
     fetchBrands();
+    fetchCurrentPromotions();
   }, []);
 
   const handleInputChange = (e) => {
@@ -198,7 +200,7 @@ const BikeEditPage = () => {
       newErrors.bike_image_url = "Вкажіть правильне посилання на зображення!";
     }
 
-    if (!bike.bike_availability)
+    if (bike.bike_availability != 1 && bike.bike_availability != 0)
       newErrors.bike_availability = "Оберіть наявність велосипеда!";
 
     if (!bike.gender)
@@ -247,176 +249,214 @@ const BikeEditPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(bike).map(([key, value]) => (
-              <div key={key}>
-                <Label htmlFor={key}>
-                  {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
-                </Label>
-                {key === "bike_availability" || key === "gender" ? (
-                  <Select
-                    value={
-                      key === "bike_availability"
-                        ? value === 1
+            {Object.entries(bike)
+              .filter(([key]) => key !== "bike_id" && key !== "bike_deleted_at")
+              .map(([key, value]) => (
+                <div key={key}>
+                  <Label htmlFor={key}>
+                    {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
+                  </Label>
+                  {key === "bike_availability" || key === "gender" ? (
+                    <Select
+                      value={
+                        key === "bike_availability"
+                          ? value === 1
+                            ? "Доступний"
+                            : value === 0
+                              ? "Недоступний"
+                              : ""
+                          : value
+                      }
+                      onValueChange={(val) =>
+                        setBike((prev) => ({
+                          ...prev,
+                          [key]:
+                            key === "bike_availability"
+                              ? val === "Доступний"
+                                ? 1
+                                : 0
+                              : val,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        {value === 1
                           ? "Доступний"
                           : value === 0
                             ? "Недоступний"
-                            : ""
-                        : value
-                    }
-                    onValueChange={(val) =>
-                      setBike((prev) => ({
-                        ...prev,
-                        [key]:
-                          key === "bike_availability"
-                            ? val === "Доступний"
-                              ? 1
-                              : 0
-                            : val,
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      {value === 1
-                        ? "Доступний"
-                        : value === 0
-                          ? "Недоступний"
-                          : value || "Виберіть опцію"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {key === "bike_availability" ? (
-                        <>
-                          <SelectItem value="Доступний">Доступний</SelectItem>
-                          <SelectItem value="Недоступний">
-                            Недоступний
-                          </SelectItem>
-                        </>
-                      ) : (
-                        <>
-                          <SelectItem value="чоловічий">Чоловічий</SelectItem>
-                          <SelectItem value="жіночий">Жіночий</SelectItem>
-                          <SelectItem value="унісекс">Унісекс</SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                ) : key === "bike_id" ? (
-                  <Input id={key} name={key} value={value} disabled />
-                ) : key === "bike_description" ? (
-                  <Textarea
-                    id={key}
-                    name={key}
-                    value={value || ""}
-                    onChange={handleInputChange}
-                  />
-                ) : key === "bike_release_date" ? (
-                  <Input
-                    id={key}
-                    name={key}
-                    type="date"
-                    value={value || ""}
-                    onChange={handleInputChange}
-                  />
-                ) : key === "bike_image_url" ? (
-                  <div className="space-y-2">
-                    <Input
+                            : value || "Виберіть опцію"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {key === "bike_availability" ? (
+                          <>
+                            <SelectItem value="Доступний">Доступний</SelectItem>
+                            <SelectItem value="Недоступний">
+                              Недоступний
+                            </SelectItem>
+                          </>
+                        ) : (
+                          <>
+                            <SelectItem value="чоловічий">Чоловічий</SelectItem>
+                            <SelectItem value="жіночий">Жіночий</SelectItem>
+                            <SelectItem value="унісекс">Унісекс</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  ) : key === "bike_id" ? (
+                    <Input id={key} name={key} value={value} disabled />
+                  ) : key === "bike_description" ? (
+                    <Textarea
                       id={key}
                       name={key}
-                      type="text"
-                      placeholder="Вставте посилання на зображення"
                       value={value || ""}
                       onChange={handleInputChange}
                     />
-                    <div className="mt-2">
-                      <img
-                        src={value}
-                        alt="Прев'ю велосипеда"
-                        className="w-full object-cover rounded-md"
+                  ) : key === "bike_release_date" ? (
+                    <Input
+                      id={key}
+                      name={key}
+                      type="date"
+                      value={value || ""}
+                      onChange={handleInputChange}
+                    />
+                  ) : key === "bike_image_url" ? (
+                    <div className="space-y-2">
+                      <Input
+                        id={key}
+                        name={key}
+                        type="text"
+                        placeholder="Вставте посилання на зображення"
+                        value={value || ""}
+                        onChange={handleInputChange}
                       />
+                      <div className="mt-2">
+                        <img
+                          src={value}
+                          alt="Прев'ю велосипеда"
+                          className="w-full object-cover rounded-md"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ) : key === "type_id" ? (
-                  <Select
-                    value={
-                      types.find((type) => type.type_id === bike.type_id)
-                        ?.type_name || ""
-                    }
-                    onValueChange={(val) => {
-                      const selectedType = types.find(
-                        (type) => type.type_name === val,
-                      );
+                  ) : key === "type_id" ? (
+                    <Select
+                      value={
+                        types.find((type) => type.type_id === bike.type_id)
+                          ?.type_name || ""
+                      }
+                      onValueChange={(val) => {
+                        const selectedType = types.find(
+                          (type) => type.type_name === val,
+                        );
 
-                      setBike((prev) => ({
-                        ...prev,
-                        type_id: selectedType?.type_id || "",
-                      }));
-                    }}
-                  >
-                    <SelectTrigger>
-                      {types.find((type) => type.type_id === bike.type_id)
-                        ?.type_name || "Оберіть тип"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {types.map((type) => (
-                        <SelectItem key={type.type_id} value={type.type_name}>
-                          {type.type_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : key === "brand_id" ? (
-                  <Select
-                    value={
-                      brands.find((brand) => brand.brand_id === bike.brand_id)
-                        ?.brand_name || ""
-                    }
-                    onValueChange={(val) => {
-                      const selectedBrand = brands.find(
-                        (brand) => brand.brand_name === val,
-                      );
+                        setBike((prev) => ({
+                          ...prev,
+                          type_id: selectedType?.type_id || "",
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        {types.find((type) => type.type_id === bike.type_id)
+                          ?.type_name || "Оберіть тип"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {types.map((type) => (
+                          <SelectItem key={type.type_id} value={type.type_name}>
+                            {type.type_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : key === "brand_id" ? (
+                    <Select
+                      value={
+                        brands.find((brand) => brand.brand_id === bike.brand_id)
+                          ?.brand_name || ""
+                      }
+                      onValueChange={(val) => {
+                        const selectedBrand = brands.find(
+                          (brand) => brand.brand_name === val,
+                        );
 
-                      setBike((prev) => ({
-                        ...prev,
-                        brand_id: selectedBrand?.brand_id || "",
-                      }));
-                    }}
-                  >
-                    <SelectTrigger>
-                      {brands.find((brand) => brand.brand_id === bike.brand_id)
-                        ?.brand_name || "Оберіть бренд"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brands.map((brand) => (
-                        <SelectItem
-                          key={brand.brand_id}
-                          value={brand.brand_name}
-                        >
-                          {brand.brand_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={key}
-                    name={key}
-                    type={
-                      key.includes("price") ||
-                      key.includes("quantity") ||
-                      key.includes("rating") ||
-                      key.includes("weight") ||
-                      key.includes("warranty_period")
-                        ? "number"
-                        : "text"
-                    }
-                    value={value || ""}
-                    onChange={handleInputChange}
-                  />
-                )}
-                {errors[key] && (
-                  <div className="text-red-600 text-sm">{errors[key]}</div>
-                )}
-              </div>
-            ))}
+                        setBike((prev) => ({
+                          ...prev,
+                          brand_id: selectedBrand?.brand_id || "",
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        {brands.find(
+                          (brand) => brand.brand_id === bike.brand_id,
+                        )?.brand_name || "Оберіть бренд"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {brands.map((brand) => (
+                          <SelectItem
+                            key={brand.brand_id}
+                            value={brand.brand_name}
+                          >
+                            {brand.brand_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : key === "promotion_id" ? (
+                    <Select
+                      value={
+                        currentPromotions.find(
+                          (promo) => promo.promotion_id === bike.promotion_id,
+                        )?.promotion_name || ""
+                      }
+                      onValueChange={(val) => {
+                        const selectedPromotion = currentPromotions.find(
+                          (promo) => promo.promotion_name === val,
+                        );
+
+                        setBike((prev) => ({
+                          ...prev,
+                          promotion_id: selectedPromotion?.promotion_id || "",
+                        }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        {currentPromotions.find(
+                          (promo) => promo.promotion_id === bike.promotion_id,
+                        )?.promotion_name || "Оберіть знижку"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currentPromotions.map((promo) => (
+                          <SelectItem
+                            key={promo.promotion_id}
+                            value={promo.promotion_name}
+                          >
+                            {promo.promotion_name} (
+                            {promo.discount_percentage * 100}%)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id={key}
+                      name={key}
+                      type={
+                        key.includes("price") ||
+                        key.includes("quantity") ||
+                        key.includes("rating") ||
+                        key.includes("weight") ||
+                        key.includes("warranty_period")
+                          ? "number"
+                          : "text"
+                      }
+                      value={value || ""}
+                      onChange={handleInputChange}
+                    />
+                  )}
+                  {errors[key] && (
+                    <div className="text-red-600 text-sm">{errors[key]}</div>
+                  )}
+                </div>
+              ))}
           </div>
         </CardContent>
         <CardFooter>

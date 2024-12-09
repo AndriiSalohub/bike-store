@@ -2,13 +2,7 @@ const { queryDatabase } = require("../db/db");
 
 // Sales Report
 const getSalesReport = (startDate, endDate, callback) => {
-  const formattedStartDate = startDate
-    ? new Date(startDate).toISOString().slice(0, 19).replace("T", " ")
-    : null;
-  const formattedEndDate = endDate
-    ? new Date(endDate).toISOString().slice(0, 19).replace("T", " ")
-    : null;
-
+  console.log(startDate, endDate);
   const query = `
     SELECT 
       t.type_name AS type_name,
@@ -27,27 +21,14 @@ const getSalesReport = (startDate, endDate, callback) => {
       bike_store.order o ON bco.order_id = o.order_id
     WHERE 
       o.order_status = 'Завершено'
-      AND (
-        (? IS NULL OR o.order_date >= ?)
-        AND (? IS NULL OR o.order_date <= ?)
-      )
+      AND (o.order_date BETWEEN ? AND ? OR ? IS NULL)
     GROUP BY 
       t.type_name
     ORDER BY 
       total_revenue DESC;
   `;
 
-  // Pass formatted date values to the query
-  queryDatabase(
-    query,
-    [
-      formattedStartDate,
-      formattedStartDate,
-      formattedEndDate,
-      formattedEndDate,
-    ],
-    callback,
-  );
+  queryDatabase(query, [startDate, endDate, startDate], callback);
 };
 
 // Quantity Report

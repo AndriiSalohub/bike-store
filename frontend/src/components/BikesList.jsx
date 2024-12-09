@@ -69,9 +69,11 @@ const BikesList = ({ filters }) => {
       </div>
       <AnimatePresence>
         <ul className="w-full grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {bikes.map((bike) => (
-            <BikesListItem key={bike.bike_id} {...bike} cartId={cartId} />
-          ))}
+          {bikes.map((bike) =>
+            bike.bike_availability != 0 ? (
+              <BikesListItem key={bike.bike_id} {...bike} cartId={cartId} />
+            ) : null,
+          )}
         </ul>
       </AnimatePresence>
     </section>

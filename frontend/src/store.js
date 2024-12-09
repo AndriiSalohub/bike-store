@@ -188,3 +188,42 @@ export const useCart = create((set) => ({
     }));
   },
 }));
+
+export const usePromotions = create((set) => ({
+  promotions: [],
+  currentPromotions: [],
+  fetchAllPromotions: async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/promotions");
+
+      set(() => ({
+        promotions: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про всі знижки:", error);
+    }
+  },
+  fetchCurrentPromotions: async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/current_promotions",
+      );
+
+      set(() => ({
+        currentPromotions: response.data,
+      }));
+    } catch (error) {
+      console.error("Помилка отримання даних про поточні знижки:", error);
+    }
+  },
+  // deleteType: (typeId) => {
+  //   set((state) => ({
+  //     types: state.types.filter((type) => type.type_id !== typeId),
+  //   }));
+  // },
+  // addType: (newType) => {
+  //   set((state) => ({
+  //     types: [...state.types, newType],
+  //   }));
+  // },
+}));

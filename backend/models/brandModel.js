@@ -1,7 +1,7 @@
 const { queryDatabase } = require("../db/db");
 
 const getAllBrands = (callback) => {
-  const query = "SELECT * FROM bike_store.brand";
+  const query = "SELECT * FROM bike_store.brand WHERE brand_deleted_at IS NULL";
 
   queryDatabase(query, [], callback);
 };

@@ -105,23 +105,25 @@ const EditBrandPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(brand).map(([key, value]) => (
-              <div key={key}>
-                <Label htmlFor={key}>
-                  {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
-                </Label>
-                <Input
-                  id={key}
-                  name={key}
-                  value={value || ""}
-                  onChange={handleInputChange}
-                  disabled={key === "brand_id"}
-                />
-                {errors[key] && (
-                  <div className="text-red-600 text-xs">{errors[key]}</div>
-                )}
-              </div>
-            ))}
+            {Object.entries(brand)
+              .filter(([key]) => key !== "brand_deleted_at")
+              .map(([key, value]) => (
+                <div key={key}>
+                  <Label htmlFor={key}>
+                    {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
+                  </Label>
+                  <Input
+                    id={key}
+                    name={key}
+                    value={value || ""}
+                    onChange={handleInputChange}
+                    disabled={key === "brand_id"}
+                  />
+                  {errors[key] && (
+                    <div className="text-red-600 text-xs">{errors[key]}</div>
+                  )}
+                </div>
+              ))}
           </div>
         </CardContent>
         <CardFooter>

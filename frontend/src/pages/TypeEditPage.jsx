@@ -107,23 +107,25 @@ const EditTypePage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(type).map(([key, value]) => (
-              <div key={key}>
-                <Label htmlFor={key}>
-                  {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
-                </Label>
-                <Input
-                  id={key}
-                  name={key}
-                  value={value || ""}
-                  onChange={handleInputChange}
-                  disabled={key === "type_id"}
-                />
-                {errors[key] && (
-                  <div className="text-red-600 text-xs">{errors[key]}</div>
-                )}
-              </div>
-            ))}
+            {Object.entries(type)
+              .filter(([key]) => key !== "type_deleted_at")
+              .map(([key, value]) => (
+                <div key={key}>
+                  <Label htmlFor={key}>
+                    {fieldLabels[key] || key.replace(/_/g, " ").toUpperCase()}
+                  </Label>
+                  <Input
+                    id={key}
+                    name={key}
+                    value={value || ""}
+                    onChange={handleInputChange}
+                    disabled={key === "type_id"}
+                  />
+                  {errors[key] && (
+                    <div className="text-red-600 text-xs">{errors[key]}</div>
+                  )}
+                </div>
+              ))}
           </div>
         </CardContent>
         <CardFooter>

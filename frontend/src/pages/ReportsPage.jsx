@@ -42,9 +42,11 @@ const ReportsPage = () => {
         return null;
       }
 
+      console.log(params);
       const response = await axios.get("http://localhost:3000/reports/sales", {
         params,
       });
+
       setSalesReportData(response.data);
       return response.data;
     } catch (error) {
@@ -82,13 +84,62 @@ const ReportsPage = () => {
 
     if (!reportData || reportData.length === 0) {
       if (fileName.includes("sales")) {
-        reportData = await fetchSalesReportData(true);
+        reportData = await fetchSalesReportData();
       } else if (fileName.includes("quantity")) {
         reportData = await fetchQuantityReportData();
       }
     }
 
     if (!reportData || reportData.length === 0) {
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      doc.addFont(RobotoRegular, "Roboto", "normal");
+      doc.setFont("Roboto");
+      doc.setFontSize(16);
+
+      // Format date range if selected
+      if (dateRange.from && dateRange.to) {
+        const formattedFrom = new Date(dateRange.from).toLocaleDateString(
+          "uk-UA",
+          {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          },
+        );
+        const formattedTo = new Date(dateRange.to).toLocaleDateString("uk-UA", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+        reportPeriod = `Звіт за період: ${formattedFrom} - ${formattedTo}`;
+      }
+
+      doc.text(reportTitle, 20, 20);
+      doc.setFontSize(12);
+      doc.text(reportPeriod, 20, 30);
+
+      // Add "No data" message based on report type
+      doc.setFontSize(14);
+      if (fileName.includes("sales")) {
+        doc.text("Немає продажів за обраний період", 20, 50);
+      } else if (fileName.includes("quantity")) {
+        doc.text("Немає інформації про кількість товару", 20, 50);
+      }
+
+      const currentDate = new Date().toLocaleDateString("uk-UA", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      doc.setFontSize(10);
+      doc.text(`Дата створення звіту: ${currentDate}`, 20, 70);
+
+      doc.save(fileName);
       return;
     }
 
@@ -102,6 +153,7 @@ const ReportsPage = () => {
     doc.setFont("Roboto");
     doc.setFontSize(16);
 
+    // Format date range if selected
     if (dateRange.from && dateRange.to) {
       const formattedFrom = new Date(dateRange.from).toLocaleDateString(
         "uk-UA",

@@ -1,7 +1,9 @@
 const { getSalesReport, getQuantityReport } = require("../models/reportsModel");
 
 const getSalesReportForPeriod = (req, res) => {
-  getSalesReport((err, data) => {
+  const { startDate, endDate } = req.query;
+
+  getSalesReport(startDate, endDate, (err, data) => {
     if (err) {
       return res
         .status(500)

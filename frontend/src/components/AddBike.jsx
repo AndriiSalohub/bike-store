@@ -90,10 +90,9 @@ const AddBike = () => {
       newErrors.bike_rating = "Рейтинг повинен бути числом від 0 до 5!";
     }
 
-    console.log(bikeDetails.bike_availability);
     if (
-      bikeDetails.bike_availability != 1 ||
-      bikeDetails.bike_availability == 0
+      bikeDetails.bike_availability != 1 &&
+      bikeDetails.bike_availability != 0
     )
       newErrors.bike_availability = "Оберіть наявність велосипеда!";
 

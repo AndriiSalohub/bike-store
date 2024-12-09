@@ -68,9 +68,11 @@ const getCurrentCart = (email, callback) => {
 
 const getCartItemsCount = (cartId, callback) => {
   const query = `
-    SELECT SUM(quantity) as total_quantity 
-    FROM bike_store.bike_cart 
-    WHERE cart_id = ? AND bike_cart_status = 'Активний'
+    SELECT 
+      SUM(bc.quantity) as total_quantity 
+    FROM bike_store.bike_cart bc
+    INNER JOIN bike_store.bike b ON bc.bike_id = b.bike_id
+    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL;
   `;
   queryDatabase(query, [cartId], callback);
 };
@@ -88,7 +90,8 @@ const getItemsFromTheCart = (cartId, callback) => {
       b.bike_color
     FROM bike_store.bike_cart bc
     JOIN bike_store.bike b ON bc.bike_id = b.bike_id
-    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний'
+    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL 
+    AND b.bike_availability = TRUE
   `;
   queryDatabase(query, [cartId], callback);
 };
@@ -132,8 +135,9 @@ const removeCartItem = (bikeId, cartId, callback) => {
 const calculateCartQuantity = (cartId, callback) => {
   const query = `
     SELECT SUM(quantity) as total_quantity 
-    FROM bike_store.bike_cart 
-    WHERE cart_id = ? AND bike_cart_status = 'Активний'
+    FROM bike_store.bike_cart bc
+    INNER JOIN bike_store.bike b ON bc.bike_id = b.bike_id
+    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL 
   `;
   queryDatabase(query, [cartId], callback);
 };
@@ -143,7 +147,7 @@ const calculateCartTotal = (cartId, callback) => {
     SELECT SUM(bc.quantity * b.bike_price) as total_cart_price 
     FROM bike_store.bike_cart bc
     JOIN bike_store.bike b ON bc.bike_id = b.bike_id
-    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний'
+    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL
   `;
   queryDatabase(query, [cartId], callback);
 };

@@ -4,6 +4,7 @@ const getAllTypesStatistic = (startDate, endDate, callback) => {
   const query = `
     SELECT 
       t.type_name, 
+      t.type_deleted_at,
       SUM(bco.quantity) AS sold_count, 
       SUM(b.bike_price * bco.quantity) AS total_revenue, 
       AVG(b.bike_price) AS avg_price 
@@ -31,6 +32,7 @@ const getAllBrandsStatistic = (startDate, endDate, callback) => {
   const query = `
     SELECT 
       br.brand_name, 
+      br.brand_deleted_at,
       COUNT(b.bike_id) AS total_bikes,
       SUM(bco.quantity) AS sold_count, 
       ROUND(AVG(b.bike_rating), 2) AS avg_rating
@@ -93,6 +95,7 @@ const getPopularBikesStatistic = (callback) => {
   const query = `
     SELECT 
       b.bike_model,
+      b.bike_deleted_at,
       b.bike_image_url,
       SUM(bco.quantity) AS total_sold,
       b.bike_price AS price,

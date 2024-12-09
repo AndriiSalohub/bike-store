@@ -9,16 +9,18 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bike, Gauge, Weight, StarIcon, CalendarDays } from "lucide-react";
+import { Bike, Gauge, Weight, StarIcon, CalendarDays, Box } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth, useCart, useTypes } from "../store";
 import { Loader2 } from "lucide-react";
 import { MdOutlineShoppingBag, MdShoppingBag } from "react-icons/md";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const BikeDetailsPage = () => {
   const { bike_id } = useParams();
   const [bike, setBike] = useState(null);
+  const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [inCart, setInCart] = useState(false);
@@ -37,7 +39,6 @@ const BikeDetailsPage = () => {
           },
         });
 
-        console.log(user);
         if (user) {
           setCartId(response.data[0].cart_id);
         }
@@ -59,6 +60,12 @@ const BikeDetailsPage = () => {
         );
         const fetchedBike = response.data[0];
         setBike(fetchedBike);
+
+        // Fetch features for this specific bike
+        const featuresResponse = await axios.get(
+          `http://localhost:3000/bike-features/${bike_id}`,
+        );
+        setFeatures(featuresResponse.data);
 
         if (cartId) {
           const cartStatusResponse = await axios.get(
@@ -149,126 +156,210 @@ const BikeDetailsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-center"
-        >
-          <img
-            src={bike.bike_image_url}
-            alt={`${bike.bike_model} ${bike.bike_color}`}
-            className="max-h-[500px] object-contain rounded-lg"
-          />
-        </motion.div>
+      <Tabs defaultValue="bike-details" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="bike-details">Деталі велосипеда</TabsTrigger>
+          <TabsTrigger value="features">
+            Додаткові характеристики ({features.length})
+          </TabsTrigger>
+        </TabsList>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold">
-                {bike.bike_model} {bike.bike_color}
-              </CardTitle>
-              <CardDescription>
-                {types?.find((type) => type.type_id == bike.type_id)?.type_name}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {bike.promotion_name && (
-                  <Badge className="mb-4 p-2 bg-red-500 text-white">
-                    {bike.promotion_name} - {bike.discount_percentage * 100}%
-                    OFF
-                  </Badge>
-                )}
-                <div className="flex justify-between items-center">
-                  {discountedPrice ? (
-                    <>
-                      <span className="text-2xl font-bold line-through text-gray-500 mr-2">
-                        {formatCurrency(bike.bike_price)}
-                      </span>
-                      <span className="text-2xl font-bold text-primary">
-                        {formatCurrency(discountedPrice)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-2xl font-bold text-primary">
-                      {formatCurrency(bike.bike_price)}
-                    </span>
-                  )}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleCartToggle}
-                    className="cursor-pointer"
-                    disabled={!bike.bike_availability}
-                  >
-                    {inCart ? (
-                      <MdShoppingBag size={30} className="text-primary" />
-                    ) : (
-                      <MdOutlineShoppingBag
-                        size={30}
-                        className="text-muted-foreground"
-                      />
+        <TabsContent value="bike-details">
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center"
+            >
+              <img
+                src={bike.bike_image_url}
+                alt={`${bike.bike_model} ${bike.bike_color}`}
+                className="max-h-[500px] object-contain rounded-lg"
+              />
+            </motion.div>
+
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-3xl font-bold">
+                    {bike.bike_model} {bike.bike_color}
+                  </CardTitle>
+                  <CardDescription>
+                    {
+                      types?.find((type) => type.type_id == bike.type_id)
+                        ?.type_name
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {bike.promotion_name && (
+                      <Badge className="mb-4 p-2 bg-red-500 text-white">
+                        {bike.promotion_name} - {bike.discount_percentage * 100}
+                        % OFF
+                      </Badge>
                     )}
-                  </motion.button>
-                </div>
+                    <div className="flex justify-between items-center">
+                      {discountedPrice ? (
+                        <>
+                          <span className="text-2xl font-bold line-through text-gray-500 mr-2">
+                            {formatCurrency(bike.bike_price)}
+                          </span>
+                          <span className="text-2xl font-bold text-primary">
+                            {formatCurrency(discountedPrice)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-2xl font-bold text-primary">
+                          {formatCurrency(bike.bike_price)}
+                        </span>
+                      )}
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleCartToggle}
+                        className="cursor-pointer"
+                        disabled={!bike.bike_availability}
+                      >
+                        {inCart ? (
+                          <MdShoppingBag size={30} className="text-primary" />
+                        ) : (
+                          <MdOutlineShoppingBag
+                            size={30}
+                            className="text-muted-foreground"
+                          />
+                        )}
+                      </motion.button>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Bike className="text-primary" />
-                    <span>Рама: {bike.frame_material}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Gauge className="text-primary" />
-                    <span>Передачі: {bike.gear_count}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Weight className="text-primary" />
-                    <span>Вага: {bike.bike_weight} кг</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <StarIcon className="text-yellow-500" fill="currentColor" />
-                    <span>Рейтинг: {bike.bike_rating} / 5</span>
-                  </div>
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <Bike className="text-primary" />
+                        <span>Рама: {bike.frame_material}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Gauge className="text-primary" />
+                        <span>Передачі: {bike.gear_count}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Weight className="text-primary" />
+                        <span>Вага: {bike.bike_weight} кг</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StarIcon
+                          className="text-yellow-500"
+                          fill="currentColor"
+                        />
+                        <span>Рейтинг: {bike.bike_rating} / 5</span>
+                      </div>
+                    </div>
 
-                <div className="flex gap-2">
-                  <Badge variant="secondary">
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    Випущено: {new Date(bike.bike_release_date).getFullYear()}
-                  </Badge>
-                  <Badge
-                    variant={bike.bike_availability ? "default" : "destructive"}
-                  >
-                    {bike.bike_availability
-                      ? "В наявності"
-                      : "Немає в наявності"}
-                  </Badge>
-                </div>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary">
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        Випущено:{" "}
+                        {new Date(bike.bike_release_date).getFullYear()}
+                      </Badge>
+                      <Badge
+                        variant={
+                          bike.bike_availability ? "default" : "destructive"
+                        }
+                      >
+                        {bike.bike_availability
+                          ? "В наявності"
+                          : "Немає в наявності"}
+                      </Badge>
+                    </div>
 
-                <p className="text-muted-foreground">{bike.bike_description}</p>
+                    <p className="text-muted-foreground">
+                      {bike.bike_description}
+                    </p>
 
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Додаткові деталі
-                  </h3>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>Розмір колеса: {bike.wheel_size} дюймів</li>
-                    <li>
-                      Максимальне навантаження: {bike.max_weight_capacity} кг
-                    </li>
-                    <li>Стать: {bike.gender}</li>
-                    <li>
-                      Гарантійний період: {bike.bike_warranty_period} місяців
-                    </li>
-                  </ul>
-                </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">
+                        Додаткові деталі
+                      </h3>
+                      <ul className="space-y-1 text-sm text-muted-foreground">
+                        <li>Розмір колеса: {bike.wheel_size} дюймів</li>
+                        <li>
+                          Максимальне навантаження: {bike.max_weight_capacity}{" "}
+                          кг
+                        </li>
+                        <li>Стать: {bike.gender}</li>
+                        <li>
+                          Гарантійний період: {bike.bike_warranty_period}{" "}
+                          місяців
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="features">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.length > 0 ? (
+              features.map((feature) => (
+                <Card
+                  key={feature.feature_id}
+                  className="hover:shadow-lg transition-shadow"
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Box className="text-primary" />
+                      {feature.feature_name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <img
+                        src={feature.feature_image_url}
+                        alt={feature.feature_name}
+                        className="w-full h-48 object-cover rounded-lg mb-4"
+                      />
+                      <p className="text-muted-foreground mb-4">
+                        {feature.feature_description}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <Badge variant="secondary">
+                          Ціна: {formatCurrency(feature.feature_price)}
+                        </Badge>
+                        <Badge
+                          variant={
+                            feature.feature_availability
+                              ? "default"
+                              : "destructive"
+                          }
+                        >
+                          {feature.feature_availability
+                            ? "В наявності"
+                            : "Немає в наявності"}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Кількість: {feature.feature_quantity}</p>
+                        <p>
+                          Гарантія: {feature.feature_warranty_period} місяців
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">
+                  Для цього велосипеда немає додаткових характеристик.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

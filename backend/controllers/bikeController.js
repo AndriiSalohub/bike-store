@@ -33,7 +33,12 @@ const getBike = (req, res) => {
 
 const putBike = (req, res) => {
   const bikeId = req.params.bike_id;
-  const newBike = req.body;
+  let newBike = req.body;
+  newBike = Object.fromEntries(
+    Object.entries(newBike).filter(
+      ([key, value]) => value !== null || key === "promotion_id",
+    ),
+  );
 
   updateBike(bikeId, newBike, (err, data) => {
     if (err) return res.status(500).send(err);

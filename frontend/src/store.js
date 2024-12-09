@@ -192,38 +192,69 @@ export const useCart = create((set) => ({
 export const usePromotions = create((set) => ({
   promotions: [],
   currentPromotions: [],
+
   fetchAllPromotions: async () => {
     try {
       const response = await axios.get("http://localhost:3000/promotions");
 
-      set(() => ({
-        promotions: response.data,
-      }));
+      set({ promotions: response.data });
     } catch (error) {
-      console.error("Помилка отримання даних про всі знижки:", error);
+      console.error("Error fetching promotions:", error);
     }
   },
+
   fetchCurrentPromotions: async () => {
     try {
       const response = await axios.get(
         "http://localhost:3000/current_promotions",
       );
 
-      set(() => ({
-        currentPromotions: response.data,
-      }));
+      set({ currentPromotions: response.data });
     } catch (error) {
-      console.error("Помилка отримання даних про поточні знижки:", error);
+      console.error("Error fetching current promotions:", error);
     }
   },
-  // deleteType: (typeId) => {
-  //   set((state) => ({
-  //     types: state.types.filter((type) => type.type_id !== typeId),
-  //   }));
-  // },
-  // addType: (newType) => {
-  //   set((state) => ({
-  //     types: [...state.types, newType],
-  //   }));
-  // },
+
+  addPromotion: async (promotionData) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/promotions",
+        promotionData,
+      );
+
+      set((state) => ({
+        promotions: [...state.promotions, response.data],
+      }));
+      return response.data;
+    } catch (error) {
+      console.error("Error adding promotion:", error);
+      throw error;
+    }
+  },
+
+  updatePromotion: async (id, promotionData) => {
+    try {
+      await axios.put(`http://localhost:3000/promotions/${id}`, promotionData);
+      const response = await axios.get("http://localhost:3000/promotions");
+
+      set({ promotions: response.data });
+    } catch (error) {
+      console.error("Error updating promotion:", error);
+      throw error;
+    }
+  },
+
+  deletePromotion: async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/promotions/${id}`);
+      set((state) => ({
+        promotions: state.promotions.filter(
+          (promo) => promo.promotion_id !== id,
+        ),
+      }));
+    } catch (error) {
+      console.error("Error deleting promotion:", error);
+      throw error;
+    }
+  },
 }));

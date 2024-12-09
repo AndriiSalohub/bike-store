@@ -17,6 +17,7 @@ const searchRoutes = require("./routes/searchRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const promotionRoutes = require("./routes/promotionRoutes");
+const featureRoutes = require("./routes/featureRoutes");
 
 const app = express();
 app.use(express.json());
@@ -54,6 +55,7 @@ app.use("", searchRoutes);
 app.use("", cartRoutes);
 app.use("", orderRoutes);
 app.use("", promotionRoutes);
+app.use("", featureRoutes);
 
 app.get("/session", (req, res) => {
   if (req.session.user) {

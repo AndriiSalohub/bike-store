@@ -41,7 +41,7 @@ const fieldLabels = {
   max_weight_capacity: "Максимальна вантажопідйомність",
   bike_warranty_period: "Гарантійний період",
   bike_release_date: "Дата випуску велосипеда",
-  promotion_id: "ID знижки",
+  promotion_id: "Знижка",
 };
 
 const BikeEditPage = () => {
@@ -250,7 +250,15 @@ const BikeEditPage = () => {
         <CardContent>
           <div className="space-y-4">
             {Object.entries(bike)
-              .filter(([key]) => key !== "bike_id" && key !== "bike_deleted_at")
+              .filter(
+                ([key]) =>
+                  key !== "bike_id" &&
+                  key !== "bike_deleted_at" &&
+                  key !== "promotion_name" &&
+                  key !== "promotion_start_date" &&
+                  key !== "promotion_end_date" &&
+                  key !== "discount_percentage",
+              )
               .map(([key, value]) => (
                 <div key={key}>
                   <Label htmlFor={key}>

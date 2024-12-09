@@ -87,9 +87,12 @@ const getItemsFromTheCart = (cartId, callback) => {
       bc.quantity, 
       b.bike_image_url,
       b.frame_material,
-      b.bike_color
+      b.bike_color,
+      p.promotion_name,
+      p.discount_percentage
     FROM bike_store.bike_cart bc
-    JOIN bike_store.bike b ON bc.bike_id = b.bike_id
+    INNER JOIN bike_store.bike b ON bc.bike_id = b.bike_id
+    LEFT JOIN bike_store.promotion p ON b.promotion_id = p.promotion_id AND p.promotion_end_date > NOW()
     WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL 
     AND b.bike_availability = TRUE
   `;
@@ -144,11 +147,20 @@ const calculateCartQuantity = (cartId, callback) => {
 
 const calculateCartTotal = (cartId, callback) => {
   const query = `
-    SELECT SUM(bc.quantity * b.bike_price) as total_cart_price 
+    SELECT 
+      SUM(
+        bc.quantity * 
+        (b.bike_price * (1 - COALESCE(p.discount_percentage, 0)))
+      ) AS total_cart_price
     FROM bike_store.bike_cart bc
     JOIN bike_store.bike b ON bc.bike_id = b.bike_id
-    WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL
+    LEFT JOIN bike_store.promotion p 
+      ON b.promotion_id = p.promotion_id AND p.promotion_end_date > NOW()
+    WHERE bc.cart_id = ? 
+    AND bc.bike_cart_status = 'Активний' 
+    AND b.bike_deleted_at IS NULL;
   `;
+
   queryDatabase(query, [cartId], callback);
 };
 

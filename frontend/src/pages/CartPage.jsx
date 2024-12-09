@@ -3,6 +3,7 @@ import { Trash2, Plus, Minus, X } from "lucide-react";
 import axios from "axios";
 import { useAuth, useCart } from "../store";
 import OrderModal from "../components/OrderModal";
+import { Badge } from "@/components/ui/badge";
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -187,66 +188,90 @@ const CartPage = () => {
       ) : (
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-4">
-            {cartItems.map((item) => (
-              <div
-                key={item.bike_id}
-                className="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 hover:shadow-lg transition-shadow"
-              >
-                <img
-                  src={item.bike_image_url}
-                  alt={item.bike_model}
-                  className="h-24 object-cover rounded-md"
-                />
+            {cartItems.map((item) => {
+              const discountedPrice = item.promotion_name
+                ? item.bike_price -
+                  item.bike_price * parseFloat(item.discount_percentage)
+                : null;
 
-                <div className="flex-grow">
-                  <h3 className="font-semibold text-lg">{item.bike_model}</h3>
-                  <p className="text-gray-500">{item.brand_name}</p>
-                  <p className="font-bold text-black">{item.bike_price} ₴</p>
+              return (
+                <div
+                  key={item.bike_id}
+                  className="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 hover:shadow-lg transition-shadow"
+                >
+                  <img
+                    src={item.bike_image_url}
+                    alt={item.bike_model}
+                    className="w-48  object-cover rounded-md"
+                  />
+
+                  <div className="flex-grow">
+                    <h3 className="font-semibold text-lg">{item.bike_model}</h3>
+                    <p className="text-gray-500">{item.brand_name}</p>
+                    {item.promotion_name && (
+                      <Badge className="mb-2 p-2 bg-red-500 text-white">
+                        {item.promotion_name} - {item.discount_percentage * 100}
+                        % OFF
+                      </Badge>
+                    )}
+                    <p className="font-bold text-black">
+                      {discountedPrice ? (
+                        <>
+                          <span className="line-through text-gray-500 mr-2">
+                            {item.bike_price} ₴
+                          </span>
+                          <span>{discountedPrice.toFixed(2)} ₴</span>
+                        </>
+                      ) : (
+                        <span>{item.bike_price} ₴</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() =>
+                        updateQuantity(
+                          item.bike_id,
+                          Math.max(1, item.quantity - 1),
+                          item.bike_cart_id,
+                        )
+                      }
+                      className="p-1 bg-gray-100 rounded-full hover:bg-gray-200"
+                    >
+                      <Minus size={20} />
+                    </button>
+                    <span className="px-3 py-1 bg-gray-100 rounded">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        updateQuantity(
+                          item.bike_id,
+                          item.quantity + 1,
+                          item.bike_cart_id,
+                        )
+                      }
+                      className={`p-1 bg-gray-100 rounded-full hover:bg-gray-200 ${
+                        item.quantity >= item.bike_quantity
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={item.quantity >= item.bike_quantity}
+                    >
+                      <Plus size={20} />
+                    </button>
+
+                    <button
+                      onClick={() => removeItem(item.bike_id)}
+                      className="text-red-500 hover:text-red-700 ml-2"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
-
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() =>
-                      updateQuantity(
-                        item.bike_id,
-                        Math.max(1, item.quantity - 1),
-                        item.bike_cart_id,
-                      )
-                    }
-                    className="p-1 bg-gray-100 rounded-full hover:bg-gray-200"
-                  >
-                    <Minus size={20} />
-                  </button>
-                  <span className="px-3 py-1 bg-gray-100 rounded">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateQuantity(
-                        item.bike_id,
-                        item.quantity + 1,
-                        item.bike_cart_id,
-                      )
-                    }
-                    className={`p-1 bg-gray-100 rounded-full hover:bg-gray-200 ${
-                      item.quantity >= item.bike_quantity
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    disabled={item.quantity >= item.bike_quantity}
-                  >
-                    <Plus size={20} />
-                  </button>
-
-                  <button
-                    onClick={() => removeItem(item.bike_id)}
-                    className="text-red-500 hover:text-red-700 ml-2"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="bg-white shadow-md rounded-lg p-6 h-fit">

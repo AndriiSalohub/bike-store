@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
   const [paymentMethod, setPaymentMethod] = useState("Карта");
@@ -118,7 +119,11 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
       .filter((item) => item.selected)
       .reduce((total, selectedItem) => {
         const item = cartItems.find((i) => i.bike_id === selectedItem.bike_id);
-        return total + (item ? item.bike_price * selectedItem.quantity : 0);
+        const discountedPrice = item.promotion_name
+          ? item.bike_price -
+            item.bike_price * parseFloat(item.discount_percentage)
+          : item.bike_price;
+        return total + discountedPrice * selectedItem.quantity;
       }, 0) + deliveryPrice;
 
   return (
@@ -135,6 +140,11 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
               (selected) => selected.bike_id === item.bike_id,
             );
 
+            const discountedPrice = item.promotion_name
+              ? item.bike_price -
+                item.bike_price * parseFloat(item.discount_percentage)
+              : null;
+
             return (
               <div
                 key={item.bike_id}
@@ -148,12 +158,29 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
                 <img
                   src={item.bike_image_url}
                   alt={item.bike_model}
-                  className="h-24 object-cover rounded-md"
+                  className="w-36 object-cover rounded-md"
                 />
                 <div className="flex-grow">
                   <h3 className="font-semibold">{item.bike_model}</h3>
                   <p className="text-gray-500">{item.brand_name}</p>
-                  <p className="font-bold">{item.bike_price} ₴</p>
+                  {item.promotion_name && (
+                    <Badge className="mb-2 p-2 bg-red-500 text-white">
+                      {item.promotion_name} - {item.discount_percentage * 100}%
+                      OFF
+                    </Badge>
+                  )}
+                  <p className="font-bold">
+                    {discountedPrice ? (
+                      <>
+                        <span className="line-through text-gray-500 mr-2">
+                          {item.bike_price} ₴
+                        </span>
+                        <span>{discountedPrice.toFixed(2)} ₴</span>
+                      </>
+                    ) : (
+                      <span>{item.bike_price} ₴</span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button

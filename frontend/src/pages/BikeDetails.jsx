@@ -143,6 +143,10 @@ const BikeDetailsPage = () => {
     );
   }
 
+  const discountedPrice = bike.promotion_name
+    ? bike.bike_price - bike.bike_price * parseFloat(bike.discount_percentage)
+    : null;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-8">
@@ -171,10 +175,27 @@ const BikeDetailsPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {bike.promotion_name && (
+                  <Badge className="mb-4 p-2 bg-red-500 text-white">
+                    {bike.promotion_name} - {bike.discount_percentage * 100}%
+                    OFF
+                  </Badge>
+                )}
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-primary">
-                    {formatCurrency(bike.bike_price)}
-                  </span>
+                  {discountedPrice ? (
+                    <>
+                      <span className="text-2xl font-bold line-through text-gray-500 mr-2">
+                        {formatCurrency(bike.bike_price)}
+                      </span>
+                      <span className="text-2xl font-bold text-primary">
+                        {formatCurrency(discountedPrice)}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-2xl font-bold text-primary">
+                      {formatCurrency(bike.bike_price)}
+                    </span>
+                  )}
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}

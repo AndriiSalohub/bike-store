@@ -11,6 +11,7 @@ import { MdOutlineShoppingBag, MdShoppingBag } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { Badge } from "@/components/ui/badge";
 
 const BikesListItem = ({
   bike_id,
@@ -20,6 +21,8 @@ const BikesListItem = ({
   bike_image_url,
   bike_color,
   cartId,
+  promotion_name,
+  discount_percentage,
 }) => {
   const { types, fetchTypes } = useTypes();
   const [inBag, setInBag] = useState(false);
@@ -63,8 +66,15 @@ const BikesListItem = ({
     }
   };
 
+  const discountedPrice = promotion_name
+    ? bike_price - bike_price * parseFloat(discount_percentage)
+    : null;
+
   return (
-    <Card className="p-4">
+    <Card className="p-4 relative">
+      {promotion_name && (
+        <Badge className="absolute top-2 left-2 p-2">{promotion_name}</Badge>
+      )}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -103,14 +113,35 @@ const BikesListItem = ({
           </CardHeader>
         </NavLink>
         <div className="flex justify-between items-center px-6">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="font-bold"
-          >
-            {bike_price} ₴
-          </motion.span>
+          {promotion_name ? (
+            <>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="font-bold line-through text-gray-500 mr-2"
+              >
+                {bike_price} ₴
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="font-bold"
+              >
+                {discountedPrice.toFixed(2)} ₴
+              </motion.span>
+            </>
+          ) : (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="font-bold"
+            >
+              {bike_price} ₴
+            </motion.span>
+          )}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

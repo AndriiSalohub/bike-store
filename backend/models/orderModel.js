@@ -26,6 +26,7 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
   doc.registerFont("Roboto-Regular", fontPath);
   doc.registerFont("Roboto-Bold", boldFontPath);
 
+  // Title
   doc
     .font("Roboto-Bold")
     .fontSize(24)
@@ -39,8 +40,8 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
   doc.moveDown();
 
   doc.font("Roboto-Bold").fontSize(12);
-  const tableHeaders = ["Найменування", "Кількість", "Ціна"];
-  const columnWidths = [250, 100, 100];
+  const tableHeaders = ["Найменування", "Кількість", "Ціна (знижка)", "Всього"];
+  const columnWidths = [200, 80, 100, 100];
   const startY = doc.y;
   let startX = 50;
 
@@ -59,8 +60,14 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
   doc.moveDown(1);
 
   const getItemDetailsQuery = `
-    SELECT b.bike_id, b.bike_model, b.bike_price
-    FROM bike_store.bike b 
+    SELECT 
+      b.bike_id, 
+      b.bike_model, 
+      b.bike_price, 
+      COALESCE(p.discount_percentage, 0) AS discount_percentage
+    FROM bike_store.bike b
+    LEFT JOIN bike_store.promotion p 
+      ON b.promotion_id = p.promotion_id AND p.promotion_end_date > NOW()
     WHERE b.bike_id IN (?)
   `;
 
@@ -69,7 +76,7 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
     [selectedCartItems.map((item) => item.bike_id)],
     (err, itemDetails) => {
       if (err) {
-        console.error("Помилка отрмання інформації:", err);
+        console.error("Помилка отримання інформації:", err);
         callback(err);
         return;
       }
@@ -79,20 +86,35 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
         const itemDetail = itemDetails.find(
           (detail) => detail.bike_id === item.bike_id,
         );
-        const itemTotal = itemDetail.bike_price * item.quantity;
+
+        const discount = parseFloat(itemDetail.discount_percentage) || 0;
+        const originalPrice = parseFloat(itemDetail.bike_price);
+        const discountedPrice = originalPrice * (1 - discount);
+        const itemTotal = discountedPrice * item.quantity;
         subtotal += itemTotal;
 
         let startX = 50;
         const currentY = doc.y;
 
         doc.font("Roboto-Regular");
-        doc.text(itemDetail.bike_model, startX, currentY, { width: 250 });
+        doc.text(itemDetail.bike_model, startX, currentY, { width: 200 });
 
-        startX += 250;
+        startX += 200;
         doc.text(item.quantity.toString(), startX, currentY, {
-          width: 100,
+          width: 80,
           align: "center",
         });
+
+        startX += 80;
+        doc.text(
+          `${originalPrice.toFixed(2)} грн (${discountedPrice.toFixed(2)} грн)`,
+          startX,
+          currentY,
+          {
+            width: 100,
+            align: "center",
+          },
+        );
 
         startX += 100;
         doc.text(`${itemTotal.toFixed(2)} грн`, startX, currentY, {
@@ -119,7 +141,6 @@ const generatePDFReceipt = (orderDetails, selectedCartItems, callback) => {
         { align: "left" },
       );
       doc.moveDown();
-
       doc.moveDown();
       doc
         .font("Roboto-Regular")
@@ -169,8 +190,18 @@ const createOrder = (orderData, selectedCartItems, callback) => {
           }
 
           const item = items[index];
+          const priceQuery = `
+            SELECT 
+              b.bike_price * ? AS item_total_price, 
+              COALESCE(p.discount_percentage, 0) AS discount_percentage
+            FROM bike_store.bike b
+            LEFT JOIN bike_store.promotion p 
+              ON b.promotion_id = p.promotion_id AND p.promotion_end_date > NOW()
+            WHERE b.bike_id = ?
+          `;
+
           queryDatabase(
-            "SELECT bike_price * ? AS item_total_price FROM bike_store.bike WHERE bike_id = ?",
+            priceQuery,
             [item.quantity, item.bike_id],
             (priceErr, priceResult) => {
               if (priceErr) {
@@ -179,7 +210,11 @@ const createOrder = (orderData, selectedCartItems, callback) => {
               }
 
               const itemPrice = priceResult[0];
-              totalBikePrice += parseFloat(itemPrice.item_total_price);
+              const discountedPrice =
+                parseFloat(itemPrice.item_total_price) *
+                (1 - parseFloat(itemPrice.discount_percentage));
+
+              totalBikePrice += discountedPrice;
               uniqueBikeCount++;
 
               processItem(index + 1);
@@ -291,8 +326,8 @@ const createOrder = (orderData, selectedCartItems, callback) => {
                       SET 
                         bike_cart_status = CASE 
                         WHEN quantity > 0 THEN 'Активний' 
-                      ELSE 'Архівований' 
-                      END
+                        ELSE 'Архівований' 
+                        END
                       WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
                       `;
 
@@ -323,7 +358,6 @@ const createOrder = (orderData, selectedCartItems, callback) => {
     });
   });
 };
-
 const getOrderHistory = (
   userEmail,
   sortBy,

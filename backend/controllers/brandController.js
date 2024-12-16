@@ -55,8 +55,6 @@ const postBrand = (req, res) => {
   addBrand(brandName, (err, data) => {
     if (err) return res.status(500).send(err);
 
-    console.log(data);
-
     return res
       .status(201)
       .send({ brand_id: data.insertId, brand_name: brandName });

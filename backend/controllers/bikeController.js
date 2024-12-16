@@ -34,9 +34,15 @@ const getBike = (req, res) => {
 const putBike = (req, res) => {
   const bikeId = req.params.bike_id;
   let newBike = req.body;
+
   newBike = Object.fromEntries(
-    Object.entries(newBike).filter(
-      ([key, value]) => value !== null || key === "promotion_id",
+    Object.entries(req.body).filter(
+      ([key, value]) =>
+        value !== null &&
+        key !== "promotion_name" &&
+        key !== "promotion_start_date" &&
+        key !== "promotion_end_date" &&
+        key !== "discount_percentage",
     ),
   );
 

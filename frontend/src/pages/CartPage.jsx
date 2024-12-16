@@ -168,6 +168,8 @@ const CartPage = () => {
     setCartQuantity(newCartQuantity);
   };
 
+  console.log(cartItems);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Кошик</h1>

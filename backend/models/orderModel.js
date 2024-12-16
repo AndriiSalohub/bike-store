@@ -303,46 +303,71 @@ const createOrder = (orderData, selectedCartItems, callback) => {
                     return;
                   }
 
-                  const updateBikeCartQuery1 = `
-                  UPDATE bike_store.bike_cart 
-                  SET 
-                    quantity = quantity - ? 
-                  WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
+                  // Update bike quantity
+                  const updateBikeQuantityQuery = `
+                    UPDATE bike_store.bike 
+                    SET bike_quantity = bike_quantity - ? 
+                    WHERE bike_id = ? AND bike_quantity >= ?
                   `;
 
                   queryDatabase(
-                    updateBikeCartQuery1,
-                    [item.quantity, cartId, item.bike_id, item.bike_cart_id],
-                    (updateErr1) => {
-                      if (updateErr1) {
+                    updateBikeQuantityQuery,
+                    [item.quantity, item.bike_id, item.quantity],
+                    (updateBikeErr) => {
+                      if (updateBikeErr) {
                         queryDatabase("ROLLBACK", [], () =>
-                          callback(updateErr1),
+                          callback(updateBikeErr),
                         );
                         return;
                       }
 
-                      const updateBikeCartQuery2 = `
+                      const updateBikeCartQuery1 = `
                       UPDATE bike_store.bike_cart 
                       SET 
-                        bike_cart_status = CASE 
-                        WHEN quantity > 0 THEN 'Активний' 
-                        ELSE 'Архівований' 
-                        END
+                        quantity = quantity - ? 
                       WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
                       `;
 
                       queryDatabase(
-                        updateBikeCartQuery2,
-                        [cartId, item.bike_id, item.bike_cart_id],
-                        (updateErr2) => {
-                          if (updateErr2) {
+                        updateBikeCartQuery1,
+                        [
+                          item.quantity,
+                          cartId,
+                          item.bike_id,
+                          item.bike_cart_id,
+                        ],
+                        (updateErr1) => {
+                          if (updateErr1) {
                             queryDatabase("ROLLBACK", [], () =>
-                              callback(updateErr2),
+                              callback(updateErr1),
                             );
                             return;
                           }
 
-                          processCartItems(index + 1);
+                          const updateBikeCartQuery2 = `
+                          UPDATE bike_store.bike_cart 
+                          SET 
+                            bike_cart_status = CASE 
+                            WHEN quantity > 0 THEN 'Активний' 
+                            ELSE 'Архівований' 
+                            END
+                          WHERE cart_id = ? AND bike_id = ? AND bike_cart_status = 'Активний' AND bike_cart_id = ?;
+                          `;
+
+                          queryDatabase(
+                            updateBikeCartQuery2,
+                            [cartId, item.bike_id, item.bike_cart_id],
+                            (updateErr2) => {
+                              if (updateErr2) {
+                                queryDatabase("ROLLBACK", [], () =>
+                                  callback(updateErr2),
+                                );
+                                return;
+                              }
+
+                              processCartItems(index + 1);
+                            },
+                          );
                         },
                       );
                     },
@@ -358,6 +383,7 @@ const createOrder = (orderData, selectedCartItems, callback) => {
     });
   });
 };
+
 const getOrderHistory = (
   userEmail,
   sortBy,

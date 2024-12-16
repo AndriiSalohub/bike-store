@@ -18,7 +18,7 @@ const HomePage = () => {
             міських вулиць відчуйте поїздку свого життя з нашими майстерно
             виготовленими велосипедами.
           </h3>
-          <button className="home-page__shop-button">
+          <button className="home-page__shop-button mb-4">
             <NavLink to="/bikes">Купуйте зараз</NavLink>
           </button>
           <BikesSlider />

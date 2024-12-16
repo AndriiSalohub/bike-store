@@ -94,15 +94,21 @@ const OrderModal = ({ cartItems, onClose, open, updateCartAfterOrder }) => {
           responseType: "blob",
         });
 
-        const url = window.URL.createObjectURL(
-          new Blob([downloadReceipt.data]),
-        );
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", response.data.receiptFilename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: response.data.receiptFilename,
+          types: [
+            {
+              description: "Receipt Files",
+              accept: { "application/pdf": [".pdf"] },
+            },
+          ],
+        });
+
+        const writableStream = await fileHandle.createWritable();
+        await writableStream.write(downloadReceipt.data);
+        await writableStream.close();
+
+        alert("Чек успішно завантажено!");
       }
 
       updateCartAfterOrder(validItems);

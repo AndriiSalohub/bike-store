@@ -74,6 +74,7 @@ const getCartItemsCount = (cartId, callback) => {
     INNER JOIN bike_store.bike b ON bc.bike_id = b.bike_id
     WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL;
   `;
+
   queryDatabase(query, [cartId], callback);
 };
 
@@ -84,6 +85,7 @@ const getItemsFromTheCart = (cartId, callback) => {
       bc.bike_id, 
       b.bike_model, 
       b.bike_price, 
+      b.bike_quantity,
       bc.quantity, 
       b.bike_image_url,
       b.frame_material,
@@ -94,7 +96,7 @@ const getItemsFromTheCart = (cartId, callback) => {
     INNER JOIN bike_store.bike b ON bc.bike_id = b.bike_id
     LEFT JOIN bike_store.promotion p ON b.promotion_id = p.promotion_id AND p.promotion_end_date > NOW()
     WHERE bc.cart_id = ? AND bc.bike_cart_status = 'Активний' AND b.bike_deleted_at IS NULL 
-    AND b.bike_availability = TRUE
+    AND b.bike_availability = TRUE AND b.bike_quantity > 0
   `;
   queryDatabase(query, [cartId], callback);
 };
